@@ -9,6 +9,8 @@
  * Tested up to: 4.8
  * Text Domain: ppp-brasil
  * Domain Path: /languages/
+ * WC requires at least: 3.0.0
+ * WC tested up to: 3.2.0
  */
 
 // Exit if not in WordPress.
