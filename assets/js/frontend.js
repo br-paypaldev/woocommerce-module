@@ -91,6 +91,12 @@ var WC_PPP_Brasil_Checkout = (function () {
         this.$form.on('submit', this.onSubmitForm);
         // Listen for window messages
         window.addEventListener('message', this.messageListener, false);
+        // Trigger update checkout on order pay page
+        if (wc_ppp_brasil_data['order_pay']) {
+            jQuery(function ($) {
+                jQuery('body').trigger('updated_checkout');
+            });
+        }
     }
     /**
      * Add event listener for input/select changes and trigger the update checkout.
