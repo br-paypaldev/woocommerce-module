@@ -4,6 +4,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+global $woocommerce;
+
+// Prevent run if version is less then 3.0.0
+if ( version_compare( $woocommerce->version, '3.0.0', "<" ) ) {
+	echo sprintf( '<p>%s</p>', 'This feature only works on WooCommerce 3.x.x. Please upgrate to view the content.' );
+
+	return;
+}
+
 $order          = new WC_Order( get_the_ID() );
 $payment_method = $order->get_payment_method();
 
