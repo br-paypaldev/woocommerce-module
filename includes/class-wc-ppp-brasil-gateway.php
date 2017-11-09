@@ -21,10 +21,14 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 	 */
 	class WC_PPP_Brasil_Gateway extends WC_Payment_Gateway {
 
+		private $woocommerce_3 = null;
+
 		/**
 		 * WC_PPP_Brasil_Gateway constructor.
 		 */
 		public function __construct() {
+			global $woocommerce;
+			$this->woocommerce_3 = version_compare( $woocommerce->version, '3.0.0', "<" );
 			// Set default settings.
 			$this->id                 = 'wc-ppp-brasil-gateway';
 			$this->has_fields         = true;
@@ -123,7 +127,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				// Get a list of existent profiles.
 				/** @var \PayPal\Api\WebProfile $profiles */
 				$profiles = \PayPal\Api\WebProfile::get_list( $api_context );
-				$this->log( 'Profile list: ' . wc_print_r( $profiles, true ) );
+				$this->log( 'Profile list: ' . $this->print_r( $profiles, true ) );
 				// Loop into profiles to get a match.
 				/** @var \PayPal\Api\WebProfile $profile */
 				foreach ( $profiles as $profile ) {
@@ -131,7 +135,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					$presentation = $profile->getPresentation();
 					// If this profile has all needed settings, there's a match.
 					if ( $input_fields->getAddressOverride() === 1 && $input_fields->getNoShipping() === 0 && $presentation->getLocaleCode() === 'BR' ) {
-						$this->log( 'Matched profile: ' . wc_print_r( $profile->toArray(), true ) );
+						$this->log( 'Matched profile: ' . $this->print_r( $profile->toArray(), true ) );
 						$web_profile = $profile;
 						break;
 					}
@@ -150,7 +154,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$this->log( 'Error #' . $uid_error );
 				$this->log( 'Code: ' . $ex->getCode() );
 				$this->log( $ex->getMessage() );
-				$this->log( 'PayPalConnectionException: ' . wc_print_r( json_decode( $ex->getData(), true ), true ) );
+				$this->log( 'PayPalConnectionException: ' . $this->print_r( json_decode( $ex->getData(), true ), true ) );
 				// If is invalid credentials
 				if ( $ex->getCode() == 401 ) {
 					$this->wrong_credentials = 'yes';
@@ -159,7 +163,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$uid_error = $this->unique_id();
 				$this->log( 'Error #' . $uid_error );
 				$this->log( $ex->getMessage() );
-				$this->log( 'PHP Error: ' . wc_print_r( json_decode( $ex->getMessage(), true ), true ) );
+				$this->log( 'PHP Error: ' . $this->print_r( json_decode( $ex->getMessage(), true ), true ) );
 			}
 			// If we don't have a web profile, set as empty.ˆ
 			if ( ! $web_profile ) {
@@ -181,11 +185,11 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$webhook_url = $this->get_webhook_url();
 				// Get a list of webhooks
 				$registered_webhooks = \PayPal\Api\Webhook::getAllWithParams( array(), $api_context );
-				$this->log( 'Webhooks list: ' . wc_print_r( $registered_webhooks->toArray(), true ) );
+				$this->log( 'Webhooks list: ' . $this->print_r( $registered_webhooks->toArray(), true ) );
 				/** @var \PayPal\Api\Webhook $registered_webhook */
 				foreach ( $registered_webhooks->getWebhooks() as $registered_webhook ) {
 					if ( $registered_webhook->getUrl() === $webhook_url ) {
-						$this->log( 'Match webhook: ' . wc_print_r( $registered_webhook->toArray(), true ) );
+						$this->log( 'Match webhook: ' . $this->print_r( $registered_webhook->toArray(), true ) );
 						$webhook = $registered_webhook;
 						break;
 					}
@@ -204,7 +208,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$this->log( 'Error #' . $uid_error );
 				$this->log( 'Code: ' . $ex->getCode() );
 				$this->log( $ex->getMessage() );
-				$this->log( 'PayPalConnectionException: ' . wc_print_r( json_decode( $ex->getData(), true ), true ) );
+				$this->log( 'PayPalConnectionException: ' . $this->print_r( json_decode( $ex->getData(), true ), true ) );
 				// If is invalid credentials
 				if ( $ex->getCode() == 401 ) {
 					$this->wrong_credentials = 'yes';
@@ -213,7 +217,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$uid_error = $this->unique_id();
 				$this->log( 'Error #' . $uid_error );
 				$this->log( $ex->getMessage() );
-				$this->log( 'PHP Error: ' . wc_print_r( json_decode( $ex->getMessage(), true ), true ) );
+				$this->log( 'PHP Error: ' . $this->print_r( json_decode( $ex->getMessage(), true ), true ) );
 			}
 			// If we don't have a webhook, set as empty.ˆ
 			if ( ! $webhook ) {
@@ -432,9 +436,9 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 			try {
 				$iframe_data = isset( $_POST['wc-ppp-brasil-data'] ) ? json_decode( wp_unslash( $_POST['wc-ppp-brasil-data'] ), true ) : null;
-				$this->log( 'Iframe init data: ' . wc_print_r( $iframe_data, true ) );
+				$this->log( 'Iframe init data: ' . $this->print_r( $iframe_data, true ) );
 				$response_data = isset( $_POST['wc-ppp-brasil-response'] ) ? json_decode( wp_unslash( $_POST['wc-ppp-brasil-response'] ), true ) : null;
-				$this->log( 'Iframe response data: ' . wc_print_r( $response_data, true ) );
+				$this->log( 'Iframe response data: ' . $this->print_r( $response_data, true ) );
 				$payer_id       = $response_data['result']['payer']['payer_info']['payer_id'];
 				$remember_cards = $response_data['result']['rememberedCards'];
 
@@ -456,7 +460,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 				// execute the order here.
 				$execution = $this->execute_payment( $order, $payment_id, $payer_id );
-				$this->log( 'Execute payment response: ' . wc_print_r( $execution->toArray(), true ) );
+				$this->log( 'Execute payment response: ' . $this->print_r( $execution->toArray(), true ) );
 				$transactions      = $execution->getTransactions();
 				$related_resources = $transactions[0]->getRelatedResources();
 				$sale              = $related_resources[0]->getSale();
@@ -502,14 +506,14 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$this->log( 'Error #' . $uid_error );
 				$this->log( 'Code: ' . $ex->getCode() );
 				$this->log( $ex->getMessage() );
-				$this->log( 'PayPalConnectionException: ' . wc_print_r( json_decode( $ex->getData(), true ), true ) );
+				$this->log( 'PayPalConnectionException: ' . $this->print_r( json_decode( $ex->getData(), true ), true ) );
 
 				return null;
 			} catch ( Exception $ex ) {
 				$uid_error = $this->unique_id();
 				wc_add_notice( sprintf( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato. Código: %s.', 'ppp-brasil' ), $uid_error ), 'error' );
 				$this->log( 'Error #' . $uid_error );
-				$this->log( 'PHP Error: ' . wc_print_r( $ex->getMessage(), true ) );
+				$this->log( 'PHP Error: ' . $this->print_r( $ex->getMessage(), true ) );
 
 				return null;
 			}
@@ -556,12 +560,12 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					$sale = new \PayPal\Api\Sale();
 					$sale->setId( $sale_id );
 
-					$this->log( 'Doing refund: ' . wc_print_r( $refund_request->toArray(), true ) );
+					$this->log( 'Doing refund: ' . $this->print_r( $refund_request->toArray(), true ) );
 
 					// Try to refund.
 					$refund_sale = $sale->refundSale( $refund_request, $api_context );
 
-					$this->log( 'Refund response: ' . wc_print_r( $refund_sale->toArray(), true ) );
+					$this->log( 'Refund response: ' . $this->print_r( $refund_sale->toArray(), true ) );
 
 					// Check the refuld success.
 					if ( $refund_sale->getState() === 'completed' ) {
@@ -576,7 +580,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					$this->log( 'Error #' . $uid_error );
 					$this->log( 'Code: ' . $ex->getCode() );
 					$this->log( $ex->getMessage() );
-					$this->log( 'PayPalConnectionException: ' . wc_print_r( $data, true ) );
+					$this->log( 'PayPalConnectionException: ' . $this->print_r( $data, true ) );
 
 					return new WP_Error( 'error', $data['message'] . ' -  Code: #' . $uid_error );
 				} catch ( Exception $ex ) { // Catch any other error.
@@ -684,22 +688,22 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			);
 
 			if ( $order ) {
-				$data['postcode']  = $order->get_shipping_postcode();
-				$data['address']   = $order->get_shipping_address_1();
-				$data['address_2'] = $order->get_shipping_address_2();
-				$data['city']      = $order->get_shipping_city();
-				$data['state']     = $order->get_shipping_state();
-				$data['country']   = $order->get_shipping_country();
+				$data['postcode']  = $this->woocommerce_3 ? $order->shipping_postcode : $order->get_shipping_postcode();
+				$data['address']   = $this->woocommerce_3 ? $order->shipping_address_1 : $order->get_shipping_address_1();
+				$data['address_2'] = $this->woocommerce_3 ? $order->shipping_address_2 : $order->get_shipping_address_2();
+				$data['city']      = $this->woocommerce_3 ? $order->shipping_city : $order->get_shipping_city();
+				$data['state']     = $this->woocommerce_3 ? $order->shipping_state : $order->get_shipping_state();
+				$data['country']   = $this->woocommerce_3 ? $order->shipping_country : $order->get_shipping_country();
 
-				$data['neighborhood'] = get_post_meta( $order->get_id(), '_billing_neighborhood', true );
-				$data['number']       = get_post_meta( $order->get_id(), '_billing_number', true );
-				$data['first_name']   = $order->get_billing_first_name();
-				$data['last_name']    = $order->get_billing_last_name();
-				$data['person_type']  = get_post_meta( $order->get_id(), '_billing_persontype', true );
-				$data['cpf']          = get_post_meta( $order->get_id(), '_billing_cpf', true );
-				$data['cnpj']         = get_post_meta( $order->get_id(), '_billing_cnpj', true );
-				$data['phone']        = $order->get_billing_phone();
-				$data['email']        = $order->get_billing_email();
+				$data['neighborhood'] = get_post_meta( $this->woocommerce_3 ? $order->id : $order->get_id(), '_billing_neighborhood', true );
+				$data['number']       = get_post_meta( $this->woocommerce_3 ? $order->id : $order->get_id(), '_billing_number', true );
+				$data['first_name']   = $this->woocommerce_3 ? $order->billing_first_name : $order->get_billing_first_name();
+				$data['last_name']    = $this->woocommerce_3 ? $order->billing_last_name : $order->get_billing_last_name();
+				$data['person_type']  = get_post_meta( $this->woocommerce_3 ? $order->id : $order->get_id(), '_billing_persontype', true );
+				$data['cpf']          = get_post_meta( $this->woocommerce_3 ? $order->id : $order->get_id(), '_billing_cpf', true );
+				$data['cnpj']         = get_post_meta( $this->woocommerce_3 ? $order->id : $order->get_id(), '_billing_cnpj', true );
+				$data['phone']        = $this->woocommerce_3 ? $order->billing_phone : $order->get_billing_phone();
+				$data['email']        = $this->woocommerce_3 ? $order->billing_email : $order->get_billing_email();
 			} else if ( $_POST ) {
 				$data['postcode']  = isset( $_POST['s_postcode'] ) ? preg_replace( '/[^0-9]/', '', $_POST['s_postcode'] ) : '';
 				$data['address']   = isset( $_POST['s_address'] ) ? sanitize_text_field( $_POST['s_address'] ) : '';
@@ -804,8 +808,8 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 				// Create the details.
 				$details = new  \PayPal\Api\Details();
-				$details->setShipping( $order ? $order->get_shipping_total() : $cart->shipping_total )
-				        ->setSubtotal( $order ? $order->get_subtotal() - $order->get_discount_total() : $cart->subtotal - $cart->discount_cart );
+				$details->setShipping( $order ? ( $this->woocommerce_3 ? $this->money_format( $order->order_shipping ) : $order->get_shipping_total() ) : $cart->shipping_total )
+				        ->setSubtotal( $order ? $order->get_subtotal() - ( $this->woocommerce_3 ? $this->money_format( $order->get_total_discount() ) : $order->get_discount_total() ) : $cart->subtotal - $cart->discount_cart );
 
 				// Create the amount.
 				$amount = new \PayPal\Api\Amount();
@@ -893,7 +897,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				        ->setTransactions( array( $transaction ) )
 				        ->setRedirectUrls( $redirect_urls );
 
-				$this->log( 'Sending create payment request: ' . wc_print_r( $payment->toArray(), true ) );
+				$this->log( 'Sending create payment request: ' . $this->print_r( $payment->toArray(), true ) );
 
 				// Get API Context.
 				$api_context = $this->get_api_context();
@@ -901,15 +905,15 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				// Create the payment.
 				$payment->create( $api_context );
 
-				$this->log( 'Payment created: ' . wc_print_r( $payment->toArray(), true ) );
+				$this->log( 'Payment created: ' . $this->print_r( $payment->toArray(), true ) );
 
 				return $payment;
 			} catch ( \PayPal\Exception\PayPalConnectionException $ex ) { // Catch any PayPal error.
 				$this->log( 'Code: ' . $ex->getCode() );
 				$this->log( $ex->getMessage() );
-				$this->log( 'PayPalConnectionException: ' . wc_print_r( json_decode( $ex->getData(), true ), true ) );
+				$this->log( 'PayPalConnectionException: ' . $this->print_r( json_decode( $ex->getData(), true ), true ) );
 			} catch ( Exception $ex ) { // Catch any other error.
-				$this->log( 'PHP Error: ' . wc_print_r( $ex->getMessage(), true ) );
+				$this->log( 'PHP Error: ' . $this->print_r( $ex->getMessage(), true ) );
 			}
 
 			throw new Exception( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato', 'ppp-brasil' ) );
@@ -1102,9 +1106,9 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			} catch ( \PayPal\Exception\PayPalConnectionException $ex ) { // Catch any PayPal error.
 				$this->log( 'Code: ' . $ex->getCode() );
 				$this->log( $ex->getMessage() );
-				$this->log( 'PayPalConnectionException: ' . wc_print_r( json_decode( $ex->getData(), true ), true ) );
+				$this->log( 'PayPalConnectionException: ' . $this->print_r( json_decode( $ex->getData(), true ), true ) );
 			} catch ( Exception $ex ) { // Catch any other error.
-				$this->log( 'PHP Error: ' . wc_print_r( $ex->getMessage(), true ) );
+				$this->log( 'PHP Error: ' . $this->print_r( $ex->getMessage(), true ) );
 			}
 
 		}
@@ -1237,6 +1241,14 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			}
 
 			return apply_filters( 'woocommerce_gateway_title', $title, $this->id );
+		}
+
+		protected function print_r( $expression, $return = false ) {
+			if ( ! function_exists( 'wc_print_r' ) ) {
+				return print_r( $expression, $return );
+			} else {
+				return wc_print_r( $expression, $return );
+			}
 		}
 
 	}
