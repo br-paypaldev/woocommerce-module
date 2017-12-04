@@ -3,14 +3,14 @@
 /**
  * Plugin Name: PayPal Plus Brasil
  * Description: Adicione facilmente opções de pagamento do PayPal Plus ao seu site do WordPress/WooCommerce.
- * Version: 1.0.2
+ * Version: 1.0.3
  * Author: PayPal
  * Requires at least: 4.4
- * Tested up to: 4.8
+ * Tested up to: 4.9
  * Text Domain: ppp-brasil
  * Domain Path: /languages/
  * WC requires at least: 3.0.0
- * WC tested up to: 3.2.0
+ * WC tested up to: 3.2.5
  */
 
 // Exit if not in WordPress.

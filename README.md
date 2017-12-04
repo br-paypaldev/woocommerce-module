@@ -2,10 +2,12 @@
 **Contributors:** [apuhlmann](https://profiles.wordpress.org/apuhlmann)  
 **Tags:** paypal, paypal plus, woocommerce, woo commerce, checkout transparente, transparente, pagamento, gateway, paypal brasil, ecommerce, e-commerce  
 **Requires at least:** 4.4  
-**Tested up to:** 4.8  
-**Stable tag:** 1.0.2  
+**Tested up to:** 4.9  
+**Stable tag:** 1.0.3  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
+**WC requires at least:** 3.0.0  
+**WC tested up to:** 3.2.5  
 
 Adicione facilmente opções de pagamento do PayPal Plus ao seu site do WordPress/WooCommerce.
 
