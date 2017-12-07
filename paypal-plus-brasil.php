@@ -2,9 +2,10 @@
 
 /**
  * Plugin Name: PayPal Plus Brasil
- * Description: Adicione facilmente opções de pagamento do PayPal Plus ao seu site do WordPress/WooCommerce.
+ * Description: Adicione o checkout transparente do PayPal ao seu checkout.
  * Version: 1.0.3
  * Author: PayPal
+ * Author URI: https://paypal.com.br
  * Requires at least: 4.4
  * Tested up to: 4.9
  * Text Domain: ppp-brasil

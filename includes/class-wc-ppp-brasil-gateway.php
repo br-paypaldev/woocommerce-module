@@ -200,7 +200,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					$webhook = $this->create_webhook( $api_context );
 				}
 				// Set the webhook ID
-				$this->log( 'Set experience profile ID to: ' . $webhook->getId() );
+				$this->log( 'Set webhook ID to: ' . $webhook->getId() );
 				$this->webhook_id        = $webhook->getId();
 				$this->wrong_credentials = 'no';
 			} catch ( \PayPal\Exception\PayPalConnectionException $ex ) {// If we get here probably was not possible to get the profile ID
