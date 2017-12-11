@@ -808,6 +808,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			$this->log( 'Creating payment' );
 			try {
 
+				// Store the amount_total, so this will always have the correct total.
 				$amount_total = 0;
 
 				// Create the details.
