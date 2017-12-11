@@ -658,7 +658,9 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 		/**
 		 * Get the posted data in the checkout.
+		 *
 		 * @return array
+		 * @throws Exception
 		 */
 		public function get_posted_data() {
 			$order_id = get_query_var( 'order-pay' );
@@ -806,16 +808,12 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			$this->log( 'Creating payment' );
 			try {
 
+				$amount_total = 0;
+
 				// Create the details.
 				$details = new  \PayPal\Api\Details();
 				$details->setShipping( $order ? ( $this->woocommerce_3 ? $this->money_format( $order->order_shipping ) : $order->get_shipping_total() ) : $cart->shipping_total )
 				        ->setSubtotal( $order ? $order->get_subtotal() - ( $this->woocommerce_3 ? $this->money_format( $order->get_total_discount() ) : $order->get_discount_total() ) : $cart->subtotal - $cart->discount_cart );
-
-				// Create the amount.
-				$amount = new \PayPal\Api\Amount();
-				$amount->setCurrency( 'BRL' )
-				       ->setTotal( $order ? $order->get_total() : $cart->total )
-				       ->setDetails( $details );
 
 				// Create payment options.
 				$payment_options = new PayPal\Api\PaymentOptions();
@@ -838,6 +836,8 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					     ->setPrice( $product_price )
 					     ->setSku( $product->get_sku() ? $product->get_sku() : $product->get_id() )
 					     ->setUrl( $product->get_permalink() );
+
+					$amount_total += $product_price;
 				}
 
 				// If order has discount, add this as a item
@@ -851,7 +851,35 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					     ->setQuantity( 1 )
 					     ->setPrice( $discount * - 1 )
 					     ->setCurrency( 'BRL' );
+
+					$amount_total += $discount * - 1;
 				}
+
+				// If order has fees, add this as a item
+				$fees = $order ? $order->get_fees() : $cart->get_fees();
+				if ( $fees ) {
+					$total_fees = 0;
+					foreach ( $fees as $fee ) {
+						$total_fees += $fee->amount;
+						$item       = new PayPal\Api\Item();
+						$items[]    = $item;
+						$item->setSku( $fee->id )
+						     ->setName( $fee->name )
+						     ->setQuantity( 1 )
+						     ->setPrice( $fee->amount )
+						     ->setCurrency( 'BRL' );
+					}
+					if ( $total_fees ) {
+						$details->setSubtotal( (float) $details->getSubtotal() + $total_fees );
+						$amount_total += $total_fees;
+					}
+				}
+
+				// Create the amount.
+				$amount = new \PayPal\Api\Amount();
+				$amount->setCurrency( 'BRL' )
+				       ->setTotal( $amount_total )
+				       ->setDetails( $details );
 
 				// Create the item list.
 				$item_list = new \PayPal\Api\ItemList();
