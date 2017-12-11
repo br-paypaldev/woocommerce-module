@@ -812,6 +812,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 				// Create the details.
 				$details = new  \PayPal\Api\Details();
+				$amount_total += $order ? ( $this->woocommerce_3 ? $this->money_format( $order->order_shipping ) : $order->get_shipping_total() ) : $cart->shipping_total;
 				$details->setShipping( $order ? ( $this->woocommerce_3 ? $this->money_format( $order->order_shipping ) : $order->get_shipping_total() ) : $cart->shipping_total )
 				        ->setSubtotal( $order ? $order->get_subtotal() - ( $this->woocommerce_3 ? $this->money_format( $order->get_total_discount() ) : $order->get_discount_total() ) : $cart->subtotal - $cart->discount_cart );
 
