@@ -545,6 +545,25 @@ class Payment extends PayPalResourceModel
         return $this->getLink(PayPalConstants::APPROVAL_URL);
     }
 
+	/**
+	 * @param $brand_name
+	 * @param string $shipping_preference
+	 *
+	 * @return $this
+	 */
+	public function setApplicationContext($brand_name, $shipping_preference = 'SET_PROVIDED_ADDRESS') {
+		$this->application_context = array(
+			'brand_name' => $brand_name,
+			'shipping_preference' => $shipping_preference
+		);
+
+		return $this;
+    }
+
+    public function getApplicationContext() {
+    	return $this->application_context;
+    }
+
     /**
      * Creates and processes a payment. In the JSON request body, include a `payment` object with the intent, payer, and transactions. For PayPal payments, include redirect URLs in the `payment` object.
      *

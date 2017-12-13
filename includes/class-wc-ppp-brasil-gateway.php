@@ -932,6 +932,9 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				// Get API Context.
 				$api_context = $this->get_api_context();
 
+				// Set the application context
+				$payment->setApplicationContext( get_bloginfo('name') );
+
 				// Create the payment.
 				$payment->create( $api_context );
 
