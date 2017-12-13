@@ -933,7 +933,10 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$api_context = $this->get_api_context();
 
 				// Set the application context
-				$payment->setApplicationContext( get_bloginfo('name') );
+				$application_context = new \PayPal\Api\ApplicationContext();
+				$application_context->setBrandName(get_bloginfo('name'));
+				$application_context->setShippingPreference();
+				$payment->setApplicationContext( $application_context );
 
 				// Create the payment.
 				$payment->create( $api_context );
