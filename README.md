@@ -33,7 +33,7 @@ Caso já tenha uma conta Empresa, você pode solicitar utilização do PayPal Pl
 
 ### Compatibilidade ###
 
-Compatível à partir da versão 3.0.x até a 3.2.6 do WooCommerce.
+Compatível à partir da versão 3.0.x até a 3.2.x do WooCommerce.
 
 ### Pré-requisitos ###
 
