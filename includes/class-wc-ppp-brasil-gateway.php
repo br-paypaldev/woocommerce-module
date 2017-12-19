@@ -812,7 +812,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$amount_total = 0;
 
 				// Create the details.
-				$details = new  \PayPal\Api\Details();
+				$details      = new  \PayPal\Api\Details();
 				$amount_total += $order ? ( $this->woocommerce_3 ? $this->money_format( $order->order_shipping ) : $order->get_shipping_total() ) : $cart->shipping_total;
 				$details->setShipping( $order ? ( $this->woocommerce_3 ? $this->money_format( $order->order_shipping ) : $order->get_shipping_total() ) : $cart->shipping_total )
 				        ->setSubtotal( $order ? $order->get_subtotal() - ( $this->woocommerce_3 ? $this->money_format( $order->get_total_discount() ) : $order->get_discount_total() ) : $cart->subtotal - $cart->discount_cart );
@@ -839,7 +839,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					     ->setSku( $product->get_sku() ? $product->get_sku() : $product->get_id() )
 					     ->setUrl( $product->get_permalink() );
 
-					$amount_total += $product_price;
+					$amount_total += $product_price * ( $order ? $item_data['qty'] : $item_data['quantity'] );
 				}
 
 				// If order has discount, add this as a item
@@ -934,7 +934,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 				// Set the application context
 				$application_context = new \PayPal\Api\ApplicationContext();
-				$application_context->setBrandName(get_bloginfo('name'));
+				$application_context->setBrandName( get_bloginfo( 'name' ) );
 				$application_context->setShippingPreference();
 				$payment->setApplicationContext( $application_context );
 
