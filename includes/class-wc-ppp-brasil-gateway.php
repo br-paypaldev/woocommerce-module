@@ -12,7 +12,6 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 	 * Class WC_PPP_Brasil_Gateway.
 	 * @property string client_id
 	 * @property string client_secret
-	 * @property string experience_profile_id
 	 * @property string $mode
 	 * @property string webhook_id
 	 * @property string debug
@@ -44,7 +43,6 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			$this->title                 = $this->get_option( 'title' );
 			$this->client_id             = $this->get_option( 'client_id' );
 			$this->client_secret         = $this->get_option( 'client_secret' );
-			$this->experience_profile_id = $this->get_option( 'experience_profile_id' );
 			$this->webhook_id            = $this->get_option( 'webhook_id' );
 			$this->mode                  = $this->get_option( 'mode' );
 			$this->debug                 = $this->get_option( 'debug' );
@@ -90,7 +88,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$is_available = false;
 			}
 
-			if ( ! $this->client_id || ! $this->client_secret || ! $this->webhook_id || ! $this->experience_profile_id || $this->wrong_credentials === 'yes' ) {
+			if ( ! $this->client_id || ! $this->client_secret || ! $this->webhook_id || $this->wrong_credentials === 'yes' ) {
 				$is_available = false;
 			}
 
@@ -111,64 +109,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			// Get the API context.
 			$api_context = $this->get_api_context();
 			// Update things.
-			$this->update_experience_profile_id( $api_context );
 			$this->update_webhooks( $api_context );
-		}
-
-		/**
-		 * Update the web experience profile ID when save.
-		 */
-		public function update_experience_profile_id( $api_context ) {
-			// Set by default as not found.
-			$web_profile = null;
-			// Check if has client_id and client_secret to connect and get web experience profile.
-			$this->log( 'Updating the experience profile ID' );
-			try {
-				// Get a list of existent profiles.
-				/** @var \PayPal\Api\WebProfile $profiles */
-				$profiles = \PayPal\Api\WebProfile::get_list( $api_context );
-				$this->log( 'Profile list: ' . $this->print_r( $profiles, true ) );
-				// Loop into profiles to get a match.
-				/** @var \PayPal\Api\WebProfile $profile */
-				foreach ( $profiles as $profile ) {
-					$input_fields = $profile->getInputFields();
-					$presentation = $profile->getPresentation();
-					// If this profile has all needed settings, there's a match.
-					if ( $input_fields->getAddressOverride() === 1 && $input_fields->getNoShipping() === 0 && $presentation->getLocaleCode() === 'BR' ) {
-						$this->log( 'Matched profile: ' . $this->print_r( $profile->toArray(), true ) );
-						$web_profile = $profile;
-						break;
-					}
-				}
-				// If no profile matched, create a new one.
-				if ( ! $web_profile ) {
-					$this->log( 'No profile matched. Creating one.' );
-					$web_profile = $this->create_experience_profile( $api_context );
-				}
-				// Set the experience_profile_id with this matched or created profile.
-				$this->log( 'Set experience profile ID to: ' . $web_profile->getId() );
-				$this->experience_profile_id = $web_profile->getId();
-				$this->wrong_credentials     = 'no';
-			} catch ( \PayPal\Exception\PayPalConnectionException $ex ) {// If we get here probably was not possible to get the profile ID
-				$uid_error = $this->unique_id();
-				$this->log( 'Error #' . $uid_error );
-				$this->log( 'Code: ' . $ex->getCode() );
-				$this->log( $ex->getMessage() );
-				$this->log( 'PayPalConnectionException: ' . $this->print_r( json_decode( $ex->getData(), true ), true ) );
-				// If is invalid credentials
-				if ( $ex->getCode() == 401 ) {
-					$this->wrong_credentials = 'yes';
-				}
-			} catch ( Exception $ex ) {
-				$uid_error = $this->unique_id();
-				$this->log( 'Error #' . $uid_error );
-				$this->log( $ex->getMessage() );
-				$this->log( 'PHP Error: ' . $this->print_r( json_decode( $ex->getMessage(), true ), true ) );
-			}
-			// If we don't have a web profile, set as empty.ˆ
-			if ( ! $web_profile ) {
-				$this->experience_profile_id = '';
-			}
 		}
 
 		/**
@@ -194,7 +135,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 						break;
 					}
 				}
-				// If no profile matched, create a new one.
+				// If no webhook matched, create a new one.
 				if ( ! $webhook ) {
 					$this->log( 'No webhook matched. Creating one.' );
 					$webhook = $this->create_webhook( $api_context );
@@ -238,44 +179,13 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$settings['client_id']             = $this->client_id;
 				$this->client_secret               = '';
 				$settings['client_secret']         = $this->client_secret;
-				$this->experience_profile_id       = '';
-				$settings['experience_profile_id'] = $this->experience_profile_id;
 				$this->webhook_id                  = '';
 				$settings['webhook_id']            = $this->webhook_id;
 			}
-			$settings['experience_profile_id'] = $this->experience_profile_id ? $this->experience_profile_id : '';
 			$settings['webhook_id']            = $this->webhook_id ? $this->webhook_id : '';
 			$settings['wrong_credentials']     = $this->wrong_credentials ? $this->wrong_credentials : 'no';
 
 			return $settings;
-		}
-
-		/**
-		 * Create a web experience profile.
-		 *
-		 * @param $api_context
-		 *
-		 * @return \PayPal\Api\CreateProfileResponse
-		 */
-		private function create_experience_profile( $api_context ) {
-			// Name.
-			$name = substr( get_bloginfo( 'name' ), 0, 50 );
-
-			// Input fields.
-			$input_fields = new \PayPal\Api\InputFields();
-			$input_fields->setAddressOverride( 1 )
-			             ->setNoShipping( 0 );
-			// Presentation
-			$presentation = new \PayPal\Api\Presentation();
-			$presentation->setLocaleCode( 'BR' )
-			             ->setBrandName( $name );
-			// Profile
-			$web_profile = new \PayPal\Api\WebProfile();
-			$web_profile->setName( $name . ' - ' . uniqid() )
-			            ->setPresentation( $presentation )
-			            ->setInputFields( $input_fields );
-
-			return $web_profile->create( $api_context );
 		}
 
 		private function create_webhook( $api_context ) {
@@ -303,7 +213,11 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 		}
 
 		private function get_webhook_url() {
-			return str_replace( 'http:', 'https:', add_query_arg( 'wc-api', $this->id, home_url( '/' ) ) );
+			$base_url = home_url( '/' );
+			if( $_SERVER['HTTP_HOST'] === 'localhost' ) {
+				$base_url = 'https://example.com/';
+			}
+			return str_replace( 'http:', 'https:', add_query_arg( 'wc-api', $this->id, $base_url ) );
 		}
 
 		/**
@@ -923,7 +837,6 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$payment = new \PayPal\Api\Payment();
 				$payment->setIntent( 'sale' )
 				        ->setPayer( $payer )
-				        ->setExperienceProfileId( $this->experience_profile_id )
 				        ->setTransactions( array( $transaction ) )
 				        ->setRedirectUrls( $redirect_urls );
 
