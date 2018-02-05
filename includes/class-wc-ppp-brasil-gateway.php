@@ -901,10 +901,6 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$errors['number'] = __( 'Número inválido', 'ppp-brasil' );
 			}
 
-			if ( empty( $data['neighborhood'] ) ) {
-				$errors['neighborhood'] = __( 'Bairro inválido', 'ppp-brasil' );
-			}
-
 			if ( empty( $data['city'] ) ) {
 				$errors['city'] = __( 'Cidade inválida', 'ppp-brasil' );
 			}
