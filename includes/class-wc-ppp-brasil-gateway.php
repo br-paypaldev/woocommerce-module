@@ -40,13 +40,13 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			$this->init_settings();
 
 			// Get options in variable.
-			$this->title                 = $this->get_option( 'title' );
-			$this->client_id             = $this->get_option( 'client_id' );
-			$this->client_secret         = $this->get_option( 'client_secret' );
-			$this->webhook_id            = $this->get_option( 'webhook_id' );
-			$this->mode                  = $this->get_option( 'mode' );
-			$this->debug                 = $this->get_option( 'debug' );
-			$this->wrong_credentials     = $this->get_option( 'wrong_credentials' );
+			$this->title             = $this->get_option( 'title' );
+			$this->client_id         = $this->get_option( 'client_id' );
+			$this->client_secret     = $this->get_option( 'client_secret' );
+			$this->webhook_id        = $this->get_option( 'webhook_id' );
+			$this->mode              = $this->get_option( 'mode' );
+			$this->debug             = $this->get_option( 'debug' );
+			$this->wrong_credentials = $this->get_option( 'wrong_credentials' );
 
 			// Active logs.
 			if ( 'yes' == $this->debug ) {
@@ -175,15 +175,15 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 		 */
 		public function filter_save_data( $settings ) {
 			if ( $this->wrong_credentials === 'yes' ) {
-				$this->client_id                   = '';
-				$settings['client_id']             = $this->client_id;
-				$this->client_secret               = '';
-				$settings['client_secret']         = $this->client_secret;
-				$this->webhook_id                  = '';
-				$settings['webhook_id']            = $this->webhook_id;
+				$this->client_id           = '';
+				$settings['client_id']     = $this->client_id;
+				$this->client_secret       = '';
+				$settings['client_secret'] = $this->client_secret;
+				$this->webhook_id          = '';
+				$settings['webhook_id']    = $this->webhook_id;
 			}
-			$settings['webhook_id']            = $this->webhook_id ? $this->webhook_id : '';
-			$settings['wrong_credentials']     = $this->wrong_credentials ? $this->wrong_credentials : 'no';
+			$settings['webhook_id']        = $this->webhook_id ? $this->webhook_id : '';
+			$settings['wrong_credentials'] = $this->wrong_credentials ? $this->wrong_credentials : 'no';
 
 			return $settings;
 		}
@@ -214,9 +214,10 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 		private function get_webhook_url() {
 			$base_url = home_url( '/' );
-			if( $_SERVER['HTTP_HOST'] === 'localhost' ) {
+			if ( $_SERVER['HTTP_HOST'] === 'localhost' ) {
 				$base_url = 'https://example.com/';
 			}
+
 			return str_replace( 'http:', 'https:', add_query_arg( 'wc-api', $this->id, $base_url ) );
 		}
 
@@ -604,6 +605,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			);
 
 			if ( $order ) {
+				$billing_cellphone = get_post_meta( $this->woocommerce_3 ? $order->id : $order->get_id(), '_billing_cellphone', true );
 				$data['postcode']  = $this->woocommerce_3 ? $order->shipping_postcode : $order->get_shipping_postcode();
 				$data['address']   = $this->woocommerce_3 ? $order->shipping_address_1 : $order->get_shipping_address_1();
 				$data['address_2'] = $this->woocommerce_3 ? $order->shipping_address_2 : $order->get_shipping_address_2();
@@ -618,7 +620,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$data['person_type']  = get_post_meta( $this->woocommerce_3 ? $order->id : $order->get_id(), '_billing_persontype', true );
 				$data['cpf']          = get_post_meta( $this->woocommerce_3 ? $order->id : $order->get_id(), '_billing_cpf', true );
 				$data['cnpj']         = get_post_meta( $this->woocommerce_3 ? $order->id : $order->get_id(), '_billing_cnpj', true );
-				$data['phone']        = $this->woocommerce_3 ? $order->billing_phone : $order->get_billing_phone();
+				$data['phone']        = $billing_cellphone ? $billing_cellphone : ( $this->woocommerce_3 ? $order->billing_phone : $order->get_billing_phone() );
 				$data['email']        = $this->woocommerce_3 ? $order->billing_email : $order->get_billing_email();
 			} else if ( $_POST ) {
 				$data['postcode']  = isset( $_POST['s_postcode'] ) ? preg_replace( '/[^0-9]/', '', $_POST['s_postcode'] ) : '';
@@ -632,6 +634,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				if ( isset( $_POST['post_data'] ) ) {
 					parse_str( $_POST['post_data'], $post_data );
 				}
+				$billing_cellphone    = isset( $post_data['billing_cellphone'] ) ? sanitize_text_field( $post_data['billing_cellphone'] ) : '';
 				$data['neighborhood'] = isset( $post_data['billing_neighborhood'] ) ? sanitize_text_field( $post_data['billing_neighborhood'] ) : '';
 				$data['number']       = isset( $post_data['billing_number'] ) ? sanitize_text_field( $post_data['billing_number'] ) : '';
 				$data['first_name']   = isset( $post_data['billing_first_name'] ) ? sanitize_text_field( $post_data['billing_first_name'] ) : '';
@@ -639,7 +642,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$data['person_type']  = isset( $post_data['billing_persontype'] ) ? sanitize_text_field( $post_data['billing_persontype'] ) : '';
 				$data['cpf']          = isset( $post_data['billing_cpf'] ) ? sanitize_text_field( $post_data['billing_cpf'] ) : '';
 				$data['cnpj']         = isset( $post_data['billing_cnpj'] ) ? sanitize_text_field( $post_data['billing_cnpj'] ) : '';
-				$data['phone']        = isset( $post_data['billing_phone'] ) ? sanitize_text_field( $post_data['billing_phone'] ) : '';
+				$data['phone']        = $billing_cellphone ? $billing_cellphone : ( isset( $post_data['billing_phone'] ) ? sanitize_text_field( $post_data['billing_phone'] ) : '' );
 				$data['email']        = isset( $post_data['billing_email'] ) ? sanitize_text_field( $post_data['billing_email'] ) : '';
 			}
 
