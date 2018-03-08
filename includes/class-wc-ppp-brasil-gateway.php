@@ -301,7 +301,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			if ( isset( $_POST['wc-ppp-brasil-error'] ) && ! empty( $_POST['wc-ppp-brasil-error'] ) ) {
 				switch ( $_POST['wc-ppp-brasil-error'] ) {
 					case 'CARD_ATTEMPT_INVALID':
-						wc_add_notice( __( 'Número de tentativas excedidas, verifique o número do seu cartão de crédito.', 'ppp-brasil' ), 'error' );
+						wc_add_notice( __( 'Número de tentativas excedidas, por favor tente novamente. Se o erro persistir entre em contato.', 'ppp-brasil' ), 'error' );
 						break;
 					case 'INTERNAL_SERVICE_ERROR':
 					case 'SOCKET_HANG_UP':
