@@ -44,17 +44,19 @@ if ( ! class_exists( 'WC_PPP_Brasil' ) ) {
 			// Check if Extra Checkout Fields for Brazil is installed
 			if ( is_admin() ) {
 				add_action( 'admin_notices', array( $this, 'ecfb_missing_notice' ) );
-				if ( ! WC_PPP_Brasil::woocommerce_incompatible() ) {
-					add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array(
-						$this,
-						'plugin_action_links'
-					) );
-				}
+				add_action( 'admin_notices', array( $this, 'woocommerce_wrong_version' ) );
+				add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array(
+					$this,
+					'plugin_action_links'
+				) );
 			}
-			// Add hook to include new gateways.
-			add_action( 'plugins_loaded', array( $this, 'include_gateway' ) );
-			// Add the payment methods.
-			add_filter( 'woocommerce_payment_gateways', array( $this, 'add_payment_method' ) );
+			// Check if WC is compatible
+			if ( ! self::woocommerce_incompatible() ) {
+				// Add hook to include new gateways.
+				add_action( 'plugins_loaded', array( $this, 'include_gateway' ) );
+				// Add the payment methods.
+				add_filter( 'woocommerce_payment_gateways', array( $this, 'add_payment_method' ) );
+			}
 		}
 
 		/**
@@ -84,13 +86,8 @@ if ( ! class_exists( 'WC_PPP_Brasil' ) ) {
 		public function include_gateway() {
 			// Check if WooCommerce is installed
 			if ( class_exists( 'WC_Payment_Gateway' ) ) {
-				// Check WooCommerce version
-				if ( self::woocommerce_incompatible() ) {
-					add_action( 'admin_notices', array( $this, 'woocommerce_wrong_version' ) );
-				} else {
-					include dirname( __FILE__ ) . '/includes/class-wc-ppp-brasil-gateway.php';
-					include dirname( __FILE__ ) . '/includes/class-wc-ppp-brasil-metabox.php';
-				}
+				include dirname( __FILE__ ) . '/includes/class-wc-ppp-brasil-gateway.php';
+				include dirname( __FILE__ ) . '/includes/class-wc-ppp-brasil-metabox.php';
 			} else {
 				add_action( 'admin_notices', array( $this, 'woocommerce_missing_notice' ) );
 			}
@@ -133,7 +130,9 @@ if ( ! class_exists( 'WC_PPP_Brasil' ) ) {
 		}
 
 		public function woocommerce_wrong_version() {
-			include dirname( __FILE__ ) . '/includes/views/html-notice-wrong-version-woocommerc.php';
+			if ( self::woocommerce_incompatible() ) {
+				include dirname( __FILE__ ) . '/includes/views/html-notice-wrong-version-woocommerc.php';
+			}
 		}
 
 		/**
@@ -144,12 +143,18 @@ if ( ! class_exists( 'WC_PPP_Brasil' ) ) {
 		 * @return array
 		 */
 		public function plugin_action_links( $links ) {
-			$plugin_links   = array();
-			$plugin_links[] = '<a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=wc-ppp-brasil-gateway' ) ) . '">' . __( 'Configurações', 'ppp-brasil' ) . '</a>';
+			$plugin_links = array();
+			if ( ! self::woocommerce_incompatible() ) {
+				$plugin_links[] = '<a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=wc-ppp-brasil-gateway' ) ) . '">' . __( 'Configurações', 'ppp-brasil' ) . '</a>';
+			}
 
 			return array_merge( $plugin_links, $links );
 		}
 
+		/**
+		 * Return if WooCommerce is compatible or not.
+		 * @return mixed
+		 */
 		public static function woocommerce_incompatible() {
 			global $woocommerce;
 
