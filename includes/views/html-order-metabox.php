@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 global $woocommerce;
 
 // Prevent run if version is less then 3.0.0
-if ( version_compare( $woocommerce->version, '3.0.0', "<" ) ) {
+if ( WC_PPP_Brasil::woocommerce_incompatible() ) {
 	echo sprintf( '<p>%s</p>', 'This feature only works on WooCommerce 3.x.x. Please upgrate to view the content.' );
 
 	return;

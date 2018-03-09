@@ -44,10 +44,12 @@ if ( ! class_exists( 'WC_PPP_Brasil' ) ) {
 			// Check if Extra Checkout Fields for Brazil is installed
 			if ( is_admin() ) {
 				add_action( 'admin_notices', array( $this, 'ecfb_missing_notice' ) );
-				add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array(
-					$this,
-					'plugin_action_links'
-				) );
+				if ( ! WC_PPP_Brasil::woocommerce_incompatible() ) {
+					add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array(
+						$this,
+						'plugin_action_links'
+					) );
+				}
 			}
 			// Add hook to include new gateways.
 			add_action( 'plugins_loaded', array( $this, 'include_gateway' ) );
@@ -82,8 +84,13 @@ if ( ! class_exists( 'WC_PPP_Brasil' ) ) {
 		public function include_gateway() {
 			// Check if WooCommerce is installed
 			if ( class_exists( 'WC_Payment_Gateway' ) ) {
-				include dirname( __FILE__ ) . '/includes/class-wc-ppp-brasil-gateway.php';
-				include dirname( __FILE__ ) . '/includes/class-wc-ppp-brasil-metabox.php';
+				// Check WooCommerce version
+				if ( self::woocommerce_incompatible() ) {
+					add_action( 'admin_notices', array( $this, 'woocommerce_wrong_version' ) );
+				} else {
+					include dirname( __FILE__ ) . '/includes/class-wc-ppp-brasil-gateway.php';
+					include dirname( __FILE__ ) . '/includes/class-wc-ppp-brasil-metabox.php';
+				}
 			} else {
 				add_action( 'admin_notices', array( $this, 'woocommerce_missing_notice' ) );
 			}
@@ -125,6 +132,10 @@ if ( ! class_exists( 'WC_PPP_Brasil' ) ) {
 			include dirname( __FILE__ ) . '/includes/views/html-notice-missing-woocommerce.php';
 		}
 
+		public function woocommerce_wrong_version() {
+			include dirname( __FILE__ ) . '/includes/views/html-notice-wrong-version-woocommerc.php';
+		}
+
 		/**
 		 * Action links.
 		 *
@@ -137,6 +148,12 @@ if ( ! class_exists( 'WC_PPP_Brasil' ) ) {
 			$plugin_links[] = '<a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=wc-ppp-brasil-gateway' ) ) . '">' . __( 'Configurações', 'ppp-brasil' ) . '</a>';
 
 			return array_merge( $plugin_links, $links );
+		}
+
+		public static function woocommerce_incompatible() {
+			global $woocommerce;
+
+			return version_compare( $woocommerce->version, '3.0.0', "<" );
 		}
 
 	}
