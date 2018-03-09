@@ -20,14 +20,10 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 	 */
 	class WC_PPP_Brasil_Gateway extends WC_Payment_Gateway {
 
-		private $woocommerce_3 = null;
-
 		/**
 		 * WC_PPP_Brasil_Gateway constructor.
 		 */
 		public function __construct() {
-			global $woocommerce;
-			$this->woocommerce_3 = version_compare( $woocommerce->version, '3.0.0', "<" );
 			// Set default settings.
 			$this->id                 = 'wc-ppp-brasil-gateway';
 			$this->has_fields         = true;
@@ -144,7 +140,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$this->log( 'Set webhook ID to: ' . $webhook->getId() );
 				$this->webhook_id        = $webhook->getId();
 				$this->wrong_credentials = 'no';
-			} catch ( \PayPal\Exception\PayPalConnectionException $ex ) {// If we get here probably was not possible to get the profile ID
+			} catch ( \PayPal\Exception\PayPalConnectionException $ex ) { // If we get here probably was not possible to get the profile ID
 				$uid_error = $this->unique_id();
 				$this->log( 'Error #' . $uid_error );
 				$this->log( 'Code: ' . $ex->getCode() );
@@ -602,23 +598,23 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			);
 
 			if ( $order ) {
-				$billing_cellphone = get_post_meta( $this->woocommerce_3 ? $order->id : $order->get_id(), '_billing_cellphone', true );
-				$data['postcode']  = $this->woocommerce_3 ? $order->shipping_postcode : $order->get_shipping_postcode();
-				$data['address']   = $this->woocommerce_3 ? $order->shipping_address_1 : $order->get_shipping_address_1();
-				$data['address_2'] = $this->woocommerce_3 ? $order->shipping_address_2 : $order->get_shipping_address_2();
-				$data['city']      = $this->woocommerce_3 ? $order->shipping_city : $order->get_shipping_city();
-				$data['state']     = $this->woocommerce_3 ? $order->shipping_state : $order->get_shipping_state();
-				$data['country']   = $this->woocommerce_3 ? $order->shipping_country : $order->get_shipping_country();
+				$billing_cellphone = get_post_meta( $order->get_id(), '_billing_cellphone', true );
+				$data['postcode']  = $order->get_shipping_postcode();
+				$data['address']   = $order->get_shipping_address_1();
+				$data['address_2'] = $order->get_shipping_address_2();
+				$data['city']      = $order->get_shipping_city();
+				$data['state']     = $order->get_shipping_state();
+				$data['country']   = $order->get_shipping_country();
 
-				$data['neighborhood'] = get_post_meta( $this->woocommerce_3 ? $order->id : $order->get_id(), '_billing_neighborhood', true );
-				$data['number']       = get_post_meta( $this->woocommerce_3 ? $order->id : $order->get_id(), '_billing_number', true );
-				$data['first_name']   = $this->woocommerce_3 ? $order->billing_first_name : $order->get_billing_first_name();
-				$data['last_name']    = $this->woocommerce_3 ? $order->billing_last_name : $order->get_billing_last_name();
-				$data['person_type']  = get_post_meta( $this->woocommerce_3 ? $order->id : $order->get_id(), '_billing_persontype', true );
-				$data['cpf']          = get_post_meta( $this->woocommerce_3 ? $order->id : $order->get_id(), '_billing_cpf', true );
-				$data['cnpj']         = get_post_meta( $this->woocommerce_3 ? $order->id : $order->get_id(), '_billing_cnpj', true );
-				$data['phone']        = $billing_cellphone ? $billing_cellphone : ( $this->woocommerce_3 ? $order->billing_phone : $order->get_billing_phone() );
-				$data['email']        = $this->woocommerce_3 ? $order->billing_email : $order->get_billing_email();
+				$data['neighborhood'] = get_post_meta( $order->get_id(), '_billing_neighborhood', true );
+				$data['number']       = get_post_meta( $order->get_id(), '_billing_number', true );
+				$data['first_name']   = $order->get_billing_first_name();
+				$data['last_name']    = $order->get_billing_last_name();
+				$data['person_type']  = get_post_meta( $order->get_id(), '_billing_persontype', true );
+				$data['cpf']          = get_post_meta( $order->get_id(), '_billing_cpf', true );
+				$data['cnpj']         = get_post_meta( $order->get_id(), '_billing_cnpj', true );
+				$data['phone']        = $billing_cellphone ? $billing_cellphone : $order->get_billing_phone();
+				$data['email']        = $order->get_billing_email();
 			} else if ( $_POST ) {
 				$data['postcode']  = isset( $_POST['s_postcode'] ) ? preg_replace( '/[^0-9]/', '', $_POST['s_postcode'] ) : '';
 				$data['address']   = isset( $_POST['s_address'] ) ? sanitize_text_field( $_POST['s_address'] ) : '';
@@ -727,9 +723,9 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 				// Create the details.
 				$details      = new  \PayPal\Api\Details();
-				$amount_total += $order ? ( $this->woocommerce_3 ? $this->money_format( $order->order_shipping ) : $order->get_shipping_total() ) : $cart->shipping_total;
-				$details->setShipping( $order ? ( $this->woocommerce_3 ? $this->money_format( $order->order_shipping ) : $order->get_shipping_total() ) : $cart->shipping_total )
-				        ->setSubtotal( $order ? $order->get_subtotal() - ( $this->woocommerce_3 ? $this->money_format( $order->get_total_discount() ) : $order->get_discount_total() ) : $cart->subtotal - $cart->discount_cart );
+				$amount_total += $order ? $order->get_shipping_total() : $cart->shipping_total;
+				$details->setShipping( $order ? $order->get_shipping_total() : $cart->shipping_total )
+				        ->setSubtotal( $order ? $order->get_subtotal() - $order->get_discount_total() : $cart->subtotal - $cart->discount_cart );
 
 				// Create payment options.
 				$payment_options = new PayPal\Api\PaymentOptions();
