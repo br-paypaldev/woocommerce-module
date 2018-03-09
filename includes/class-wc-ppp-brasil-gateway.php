@@ -398,9 +398,6 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 						$order->update_status( 'on-hold', __( 'O pagamento está em revisão pelo PayPal.', 'ppp-brasil' ) );
 						$result_success = true;
 						break;
-					default:
-						$order->update_status( 'failed', __( 'Não foi possível executar o pagamento.', 'ppp-brasil' ) );
-						break;
 				}
 
 				if ( $result_success ) {
