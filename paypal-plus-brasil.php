@@ -156,9 +156,9 @@ if ( ! class_exists( 'WC_PPP_Brasil' ) ) {
 		 * @return mixed
 		 */
 		public static function woocommerce_incompatible() {
-			global $woocommerce;
+			$version = get_option( 'woocommerce_version' );
 
-			return version_compare( $woocommerce->version, '3.0.0', "<" );
+			return version_compare( $version, '3.0.0', "<" );
 		}
 
 	}
