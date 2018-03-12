@@ -284,7 +284,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 		 *
 		 * @param bool $force
 		 *
-		 * @return null|array|void
+		 * @return null|array
 		 */
 		public function process_payment( $order_id, $force = false ) {
 			$this->log( 'Processing payment for order #' . $order_id );
@@ -324,7 +324,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$this->log( 'Error #' . $uid_error );
 				$this->log( 'Payment failed because an iframe error: ' . sanitize_text_field( $_POST['wc-ppp-brasil-error'] ) );
 
-				return;
+				return null;
 			}
 
 			// Prevent submit any dummy data.
@@ -332,7 +332,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				wc_add_notice( __( 'You are not allowed to do that.', 'ppp-brasil' ), 'error' );
 				$this->log( 'Payment failed because was trying to pay with dummy data.' );
 
-				return;
+				return null;
 			}
 
 			// Check the payment id
@@ -340,7 +340,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				wc_add_notice( __( 'Invalid payment ID.', 'ppp-brasil' ), 'error' );
 				$this->log( 'Payment failed because was trying to pay with invalid payment ID' );
 
-				return;
+				return null;
 			}
 
 			try {
@@ -356,7 +356,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					wc_add_notice( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato.', 'ppp-brasil' ), 'error' );
 					$this->log( 'Empty payer ID' );
 
-					return;
+					return null;
 				}
 
 				// Check if the payment id equal to stored
@@ -364,7 +364,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					wc_add_notice( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato.', 'ppp-brasil' ), 'error' );
 					$this->log( 'Payment failed because was trying to change the iframe response data with a new payment ID' );
 
-					return;
+					return null;
 				}
 
 				// execute the order here.
@@ -528,12 +528,16 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 		}
 
+		/** @noinspection PhpDocRedundantThrowsInspection */
+
 		/**
 		 * Execute a payment.
 		 *
 		 * @param $order WC_Order
 		 * @param $payment_id
 		 * @param $payer_id
+		 *
+		 * @throws \PayPal\Exception\PayPalConnectionException
 		 *
 		 * @return \PayPal\Api\Payment
 		 */
