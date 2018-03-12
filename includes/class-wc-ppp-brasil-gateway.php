@@ -282,9 +282,11 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 		 *
 		 * @param int $order_id
 		 *
-		 * @return array
+		 * @param bool $force
+		 *
+		 * @return null|array|void
 		 */
-		public function process_payment( $order_id ) {
+		public function process_payment( $order_id, $force = false ) {
 			$this->log( 'Processing payment for order #' . $order_id );
 			$order      = wc_get_order( $order_id );
 			$payment_id = WC()->session->get( 'wc-ppp-brasil-payment-id' );
@@ -405,12 +407,33 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					);
 				}
 			} catch ( \PayPal\Exception\PayPalConnectionException $ex ) {
+				$data      = json_decode( $ex->getData(), true );
 				$uid_error = $this->unique_id();
-				wc_add_notice( sprintf( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato. Código: %s.', 'ppp-brasil' ), $uid_error ), 'error' );
-				$this->log( 'Error #' . $uid_error );
-				$this->log( 'Code: ' . $ex->getCode() );
-				$this->log( $ex->getMessage() );
-				$this->log( 'PayPalConnectionException: ' . $this->print_r( json_decode( $ex->getData(), true ), true ) );
+
+				switch ( $data['name'] ) {
+					// Repeat the execution
+					case 'INTERNAL_SERVICE_ERROR':
+						if ( $force ) {
+							$this->log( 'Error #' . $uid_error );
+							wc_add_notice( sprintf( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato. Código: %s.', 'ppp-brasil' ), $uid_error ), 'error' );
+						} else {
+							$this->process_payment( $order_id, true );
+						}
+						break;
+					case 'VALIDATION_ERROR':
+						wc_add_notice( sprintf( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato. Código: %s.', 'ppp-brasil' ), $uid_error ), 'error' );
+						$this->log( 'Error #' . $uid_error );
+						break;
+					case 'PAYMENT_ALREADY_DONE':
+						wc_add_notice( __( 'O seu pagamento já foi aprovado.', 'ppp-brasil' ), 'error' );
+						break;
+					default:
+						wc_add_notice( __( 'O seu pagamento não foi aprovado, por favor tente novamente.', 'ppp-brasil' ), 'error' );
+						break;
+				}
+
+				// Log anyway
+				$this->log( 'PayPalConnectionException: ' . $this->print_r( $ex->getMessage(), true ) );
 
 				return null;
 			} catch ( Exception $ex ) {
@@ -995,6 +1018,40 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 			// Add an ID to track this extension.
 			$api_context->addRequestHeader( "PayPal-Partner-Attribution-Id", 'WooCommerceBR_Ecom_PPPlus' );
+
+			return $api_context;
+		}
+
+		public function get_api_context2( $client_id = null, $client_secret = null, $mode = null ) {
+			// Autoload the SDK.
+			include_once dirname( __FILE__ ) . '/libs/PayPal-PHP-SDK/autoload.php';
+
+			// Set the instance client_id if not given.
+			if ( $client_id === null ) {
+				$client_id = $this->client_id;
+			}
+
+			// Set the instance client_secret if not given.
+			if ( $client_secret === null ) {
+				$client_secret = $this->client_secret;
+			}
+
+			// Set the instance sandbox if not given.
+			if ( $mode === null ) {
+				$mode = $this->mode;
+			}
+
+			// Create the credentials.
+			$credential         = new \PayPal\Auth\OAuthTokenCredential( $client_id, $client_secret );
+			$api_context        = new \PayPal\Rest\ApiContext( $credential );
+			$api_context_config = array(
+				'mode' => $mode === 'sandbox' ? 'sandbox' : 'live',
+			);
+			$api_context->setConfig( $api_context_config );
+
+			// Add an ID to track this extension.
+			$api_context->addRequestHeader( "PayPal-Partner-Attribution-Id", 'WooCommerceBR_Ecom_PPPlus' );
+			$api_context->addRequestHeader( "PayPal-Mock-Response", '{"mock_application_codes":"INSTRUMENT_DECLINED"}' );
 
 			return $api_context;
 		}
