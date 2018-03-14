@@ -425,7 +425,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 						$this->log( 'Error #' . $uid_error );
 						break;
 					case 'PAYMENT_ALREADY_DONE':
-						wc_add_notice( __( 'O seu pagamento já foi aprovado.', 'ppp-brasil' ), 'error' );
+						wc_add_notice( __( 'Já existe um pagamento para este pedido.', 'ppp-brasil' ), 'error' );
 						break;
 					default:
 						wc_add_notice( __( 'O seu pagamento não foi aprovado, por favor tente novamente.', 'ppp-brasil' ), 'error' );
@@ -1026,7 +1026,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			return $api_context;
 		}
 
-		public function get_api_context2( $client_id = null, $client_secret = null, $mode = null ) {
+		public function get_api_context_negative( $client_id = null, $client_secret = null, $mode = null ) {
 			// Autoload the SDK.
 			include_once dirname( __FILE__ ) . '/libs/PayPal-PHP-SDK/autoload.php';
 
@@ -1055,7 +1055,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 			// Add an ID to track this extension.
 			$api_context->addRequestHeader( "PayPal-Partner-Attribution-Id", 'WooCommerceBR_Ecom_PPPlus' );
-			$api_context->addRequestHeader( "PayPal-Mock-Response", '{"mock_application_codes":"INSTRUMENT_DECLINED"}' );
+			$api_context->addRequestHeader( "PayPal-Mock-Response", '{"mock_application_codes":"INSUFFICIENT_FUNDS"}' );
 
 			return $api_context;
 		}
