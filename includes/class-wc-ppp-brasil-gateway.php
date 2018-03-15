@@ -975,7 +975,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 		public function checkout_scripts() {
 			// Just load this script in checkout and if isn't in order-receive.
 			if ( is_checkout() && ! get_query_var( 'order-received' ) ) {
-				wp_enqueue_script( 'ppp-script', '//www.paypalobjects.com/webstatic/ppplusdcc/ppplusdcc.min.js', array(), '1.0.0', true );
+				wp_enqueue_script( 'ppp-script', '//www.paypalobjects.com/webstatic/ppplusdcc/ppplusdcc.min.js', array(), '1.0.8', true );
 				wp_localize_script( 'ppp-script', 'wc_ppp_brasil_data', array(
 					'id'          => $this->id,
 					'order_pay'   => ! ! get_query_var( 'order-pay' ),
@@ -985,8 +985,8 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 						'check_entry' => __( 'Verifique os dados informados e tente novamente', 'ppp-brasil' ),
 					),
 				) );
-				wp_enqueue_script( 'wc-ppp-brasil-script', plugins_url( 'assets/js/frontend.js', __DIR__ ), array( 'jquery' ), '1.0.0', true );
-				wp_enqueue_style( 'wc-ppp-brasil-style', plugins_url( 'assets/css/frontend.css', __DIR__ ), array(), '1.0.0', 'all' );
+				wp_enqueue_script( 'wc-ppp-brasil-script', plugins_url( 'assets/js/frontend.js', __DIR__ ), array( 'jquery' ), '1.0.8', true );
+				wp_enqueue_style( 'wc-ppp-brasil-style', plugins_url( 'assets/css/frontend.css', __DIR__ ), array(), '1.0.8', 'all' );
 			}
 		}
 
@@ -1014,7 +1014,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			$wc_screen_id   = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
 			$wc_settings_id = $wc_screen_id . '_page_wc-settings';
 			if ( $wc_settings_id === $screen_id && isset( $_GET['section'] ) && $_GET['section'] === $this->id ) {
-				wp_enqueue_style( 'wc-ppp-brasil-admin-style', plugins_url( 'assets/css/backend.css', __DIR__ ), array(), '1.0.0', 'all' );
+				wp_enqueue_style( 'wc-ppp-brasil-admin-style', plugins_url( 'assets/css/backend.css', __DIR__ ), array(), '1.0.8', 'all' );
 			}
 		}
 
