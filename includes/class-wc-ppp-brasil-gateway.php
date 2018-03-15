@@ -17,6 +17,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 	 * @property string debug
 	 * @property WC_Logger log
 	 * @property string wrong_credentials
+	 * @property string form_height
 	 */
 	class WC_PPP_Brasil_Gateway extends WC_Payment_Gateway {
 
@@ -43,6 +44,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			$this->mode              = $this->get_option( 'mode' );
 			$this->debug             = $this->get_option( 'debug' );
 			$this->wrong_credentials = $this->get_option( 'wrong_credentials' );
+			$this->form_height       = $this->get_option( 'form_height' );
 
 			// Active logs.
 			if ( 'yes' == $this->debug ) {
@@ -222,13 +224,13 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 		 */
 		public function init_form_fields() {
 			$this->form_fields = array(
-				'enabled'       => array(
+				'enabled'           => array(
 					'title'   => __( 'Habilitar/Desabilitar', 'ppp-brasil' ),
 					'type'    => 'checkbox',
 					'label'   => __( 'Habilitar', 'ppp-brasil' ),
 					'default' => 'yes',
 				),
-				'title'         => array(
+				'title'             => array(
 					'title'       => __( 'Nome de exibição', 'ppp-brasil' ),
 					'type'        => 'text',
 					'default'     => '',
@@ -236,7 +238,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					'description' => __( 'Será exibido no checkout: Cartão de Crédito (Parcelado em até 12x)', 'ppp-brasil' ),
 					'desc_tip'    => __( 'Por padrão a solução do PayPal Plus é exibida como “Cartão de Crédito”, utilize esta opção para definir um texto adicional como parcelamento ou descontos.', 'ppp-brasil' ),
 				),
-				'mode'          => array(
+				'mode'              => array(
 					'title'       => __( 'Modo', 'ppp-brasil' ),
 					'type'        => 'select',
 					'options'     => array(
@@ -245,25 +247,37 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					),
 					'description' => __( 'Utilize esta opção para alternar entre os modos Sandbox e Produção. Sandbox é utilizado para testes e Produção para compras reais.', 'ppp-brasil' ),
 				),
-				'client_id'     => array(
+				'client_id'         => array(
 					'title'       => __( 'Client ID', 'ppp-brasil' ),
 					'type'        => 'text',
 					'default'     => '',
 					'description' => sprintf( __( 'Para gerar o Client ID acesse <a href="%s" target="_blank">aqui</a> e procure pela seção “REST API apps”.', 'ppp-brasil' ), 'https://developer.paypal.com/docs/classic/lifecycle/sb_credentials/' ),
 
 				),
-				'client_secret' => array(
+				'client_secret'     => array(
 					'title'       => __( 'Secret ID', 'ppp-brasil' ),
 					'type'        => 'text',
 					'default'     => '',
 					'description' => sprintf( __( 'Para gerar o Secret ID acesse <a href="%s" target="_blank">aqui</a> e procure pela seção “REST API apps”.', 'ppp-brasil' ), 'https://developer.paypal.com/docs/classic/lifecycle/sb_credentials/' ),
 				),
-				'debug'         => array(
+				'debug'             => array(
 					'title'       => __( 'Modo depuração', 'ppp-brasil' ),
 					'type'        => 'checkbox',
 					'label'       => __( 'Habilitar', 'ppp-brasil' ),
 					'desc_tip'    => __( 'Habilite este modo para depurar a aplicação em caso de homologação ou erros.', 'ppp-brasil' ),
 					'description' => sprintf( __( 'Os logs serão salvos no caminho: %s.', 'woo-paypal-plus-brazil' ), $this->get_log_view() ),
+				),
+				'advanced_settings' => array(
+					'title'       => __( 'Configurações avançadas', 'ppp-brasil' ),
+					'type'        => 'title',
+					'description' => __( 'Utilize estas opções para customizar a experiência da solução.', 'ppp-brasil' ),
+				),
+				'form_height'       => array(
+					'title'       => __( 'Altura do formulário', 'ppp-brasil' ),
+					'type'        => 'text',
+					'default'     => '',
+					'placeholder' => __( 'px', 'ppp-brasil' ),
+					'description' => __( 'Utilize esta opção para definir uma altura máxima do formulário de cartão de crédito (será considerado um valor em pixels).', 'ppp-brasil' ),
 				),
 			);
 		}
@@ -963,16 +977,30 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			if ( is_checkout() && ! get_query_var( 'order-received' ) ) {
 				wp_enqueue_script( 'ppp-script', '//www.paypalobjects.com/webstatic/ppplusdcc/ppplusdcc.min.js', array(), '1.0.0', true );
 				wp_localize_script( 'ppp-script', 'wc_ppp_brasil_data', array(
-					'id'        => $this->id,
-					'order_pay' => ! ! get_query_var( 'order-pay' ),
-					'mode'      => $this->mode === 'sandbox' ? 'sandbox' : 'live',
-					'messages'  => array(
+					'id'          => $this->id,
+					'order_pay'   => ! ! get_query_var( 'order-pay' ),
+					'mode'        => $this->mode === 'sandbox' ? 'sandbox' : 'live',
+					'form_height' => $this->get_form_height(),
+					'messages'    => array(
 						'check_entry' => __( 'Verifique os dados informados e tente novamente', 'ppp-brasil' ),
 					),
 				) );
 				wp_enqueue_script( 'wc-ppp-brasil-script', plugins_url( 'assets/js/frontend.js', __DIR__ ), array( 'jquery' ), '1.0.0', true );
 				wp_enqueue_style( 'wc-ppp-brasil-style', plugins_url( 'assets/css/frontend.css', __DIR__ ), array(), '1.0.0', 'all' );
 			}
+		}
+
+		/**
+		 * Get form height.
+		 */
+		private function get_form_height() {
+			$height = trim( $this->form_height );
+			$test   = preg_match( '/[0-9]+/', $height, $matches );
+			if ( $test && $matches[0] === $height ) {
+				return $height;
+			}
+
+			return null;
 		}
 
 		/**
