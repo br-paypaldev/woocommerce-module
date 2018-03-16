@@ -995,8 +995,8 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 		 */
 		private function get_form_height() {
 			$height    = trim( $this->form_height );
-			$min_value = 0;
-			$max_value = 10000;
+			$min_value = 400;
+			$max_value = 550;
 			$test      = preg_match( '/[0-9]+/', $height, $matches );
 			if ( $test && $matches[0] === $height && $height >= $min_value && $height <= $max_value ) {
 				return $height;
