@@ -277,7 +277,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					'type'        => 'text',
 					'default'     => '',
 					'placeholder' => __( 'px', 'ppp-brasil' ),
-					'description' => __( 'Utilize esta opção para definir uma altura máxima do formulário de cartão de crédito (será considerado um valor em pixels). Valores entre 400 e 550.', 'ppp-brasil' ),
+					'description' => __( 'Utilize esta opção para definir uma altura máxima do formulário de cartão de crédito (será considerado um valor em pixels). Será aceito um valor em pixels entre 400 - 550.', 'ppp-brasil' ),
 				),
 			);
 		}
