@@ -3,7 +3,7 @@
 /**
  * Plugin Name: PayPal Plus Brasil
  * Description: Adicione o checkout transparente do PayPal ao seu checkout.
- * Version: 1.0.7
+ * Version: 1.0.8
  * Author: PayPal
  * Author URI: https://paypal.com.br
  * Requires at least: 4.4
@@ -44,15 +44,19 @@ if ( ! class_exists( 'WC_PPP_Brasil' ) ) {
 			// Check if Extra Checkout Fields for Brazil is installed
 			if ( is_admin() ) {
 				add_action( 'admin_notices', array( $this, 'ecfb_missing_notice' ) );
+				add_action( 'admin_notices', array( $this, 'woocommerce_wrong_version' ) );
 				add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array(
 					$this,
 					'plugin_action_links'
 				) );
 			}
-			// Add hook to include new gateways.
-			add_action( 'plugins_loaded', array( $this, 'include_gateway' ) );
-			// Add the payment methods.
-			add_filter( 'woocommerce_payment_gateways', array( $this, 'add_payment_method' ) );
+			// Check if WC is compatible
+			if ( ! self::woocommerce_incompatible() ) {
+				// Add hook to include new gateways.
+				add_action( 'plugins_loaded', array( $this, 'include_gateway' ) );
+				// Add the payment methods.
+				add_filter( 'woocommerce_payment_gateways', array( $this, 'add_payment_method' ) );
+			}
 		}
 
 		/**
@@ -125,6 +129,12 @@ if ( ! class_exists( 'WC_PPP_Brasil' ) ) {
 			include dirname( __FILE__ ) . '/includes/views/html-notice-missing-woocommerce.php';
 		}
 
+		public function woocommerce_wrong_version() {
+			if ( self::woocommerce_incompatible() ) {
+				include dirname( __FILE__ ) . '/includes/views/html-notice-wrong-version-woocommerc.php';
+			}
+		}
+
 		/**
 		 * Action links.
 		 *
@@ -133,10 +143,22 @@ if ( ! class_exists( 'WC_PPP_Brasil' ) ) {
 		 * @return array
 		 */
 		public function plugin_action_links( $links ) {
-			$plugin_links   = array();
-			$plugin_links[] = '<a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=wc-ppp-brasil-gateway' ) ) . '">' . __( 'Configurações', 'ppp-brasil' ) . '</a>';
+			$plugin_links = array();
+			if ( ! self::woocommerce_incompatible() ) {
+				$plugin_links[] = '<a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=wc-ppp-brasil-gateway' ) ) . '">' . __( 'Configurações', 'ppp-brasil' ) . '</a>';
+			}
 
 			return array_merge( $plugin_links, $links );
+		}
+
+		/**
+		 * Return if WooCommerce is compatible or not.
+		 * @return mixed
+		 */
+		public static function woocommerce_incompatible() {
+			$version = get_option( 'woocommerce_version' );
+
+			return version_compare( $version, '3.0.0', "<" );
 		}
 
 	}

@@ -17,17 +17,14 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 	 * @property string debug
 	 * @property WC_Logger log
 	 * @property string wrong_credentials
+	 * @property string form_height
 	 */
 	class WC_PPP_Brasil_Gateway extends WC_Payment_Gateway {
-
-		private $woocommerce_3 = null;
 
 		/**
 		 * WC_PPP_Brasil_Gateway constructor.
 		 */
 		public function __construct() {
-			global $woocommerce;
-			$this->woocommerce_3 = version_compare( $woocommerce->version, '3.0.0', "<" );
 			// Set default settings.
 			$this->id                 = 'wc-ppp-brasil-gateway';
 			$this->has_fields         = true;
@@ -47,6 +44,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			$this->mode              = $this->get_option( 'mode' );
 			$this->debug             = $this->get_option( 'debug' );
 			$this->wrong_credentials = $this->get_option( 'wrong_credentials' );
+			$this->form_height       = $this->get_option( 'form_height' );
 
 			// Active logs.
 			if ( 'yes' == $this->debug ) {
@@ -144,7 +142,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$this->log( 'Set webhook ID to: ' . $webhook->getId() );
 				$this->webhook_id        = $webhook->getId();
 				$this->wrong_credentials = 'no';
-			} catch ( \PayPal\Exception\PayPalConnectionException $ex ) {// If we get here probably was not possible to get the profile ID
+			} catch ( \PayPal\Exception\PayPalConnectionException $ex ) { // If we get here probably was not possible to get the profile ID
 				$uid_error = $this->unique_id();
 				$this->log( 'Error #' . $uid_error );
 				$this->log( 'Code: ' . $ex->getCode() );
@@ -226,13 +224,13 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 		 */
 		public function init_form_fields() {
 			$this->form_fields = array(
-				'enabled'       => array(
+				'enabled'           => array(
 					'title'   => __( 'Habilitar/Desabilitar', 'ppp-brasil' ),
 					'type'    => 'checkbox',
 					'label'   => __( 'Habilitar', 'ppp-brasil' ),
 					'default' => 'yes',
 				),
-				'title'         => array(
+				'title'             => array(
 					'title'       => __( 'Nome de exibição', 'ppp-brasil' ),
 					'type'        => 'text',
 					'default'     => '',
@@ -240,7 +238,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					'description' => __( 'Será exibido no checkout: Cartão de Crédito (Parcelado em até 12x)', 'ppp-brasil' ),
 					'desc_tip'    => __( 'Por padrão a solução do PayPal Plus é exibida como “Cartão de Crédito”, utilize esta opção para definir um texto adicional como parcelamento ou descontos.', 'ppp-brasil' ),
 				),
-				'mode'          => array(
+				'mode'              => array(
 					'title'       => __( 'Modo', 'ppp-brasil' ),
 					'type'        => 'select',
 					'options'     => array(
@@ -249,25 +247,37 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					),
 					'description' => __( 'Utilize esta opção para alternar entre os modos Sandbox e Produção. Sandbox é utilizado para testes e Produção para compras reais.', 'ppp-brasil' ),
 				),
-				'client_id'     => array(
+				'client_id'         => array(
 					'title'       => __( 'Client ID', 'ppp-brasil' ),
 					'type'        => 'text',
 					'default'     => '',
 					'description' => sprintf( __( 'Para gerar o Client ID acesse <a href="%s" target="_blank">aqui</a> e procure pela seção “REST API apps”.', 'ppp-brasil' ), 'https://developer.paypal.com/docs/classic/lifecycle/sb_credentials/' ),
 
 				),
-				'client_secret' => array(
+				'client_secret'     => array(
 					'title'       => __( 'Secret ID', 'ppp-brasil' ),
 					'type'        => 'text',
 					'default'     => '',
 					'description' => sprintf( __( 'Para gerar o Secret ID acesse <a href="%s" target="_blank">aqui</a> e procure pela seção “REST API apps”.', 'ppp-brasil' ), 'https://developer.paypal.com/docs/classic/lifecycle/sb_credentials/' ),
 				),
-				'debug'         => array(
+				'debug'             => array(
 					'title'       => __( 'Modo depuração', 'ppp-brasil' ),
 					'type'        => 'checkbox',
 					'label'       => __( 'Habilitar', 'ppp-brasil' ),
 					'desc_tip'    => __( 'Habilite este modo para depurar a aplicação em caso de homologação ou erros.', 'ppp-brasil' ),
 					'description' => sprintf( __( 'Os logs serão salvos no caminho: %s.', 'woo-paypal-plus-brazil' ), $this->get_log_view() ),
+				),
+				'advanced_settings' => array(
+					'title'       => __( 'Configurações avançadas', 'ppp-brasil' ),
+					'type'        => 'title',
+					'description' => __( 'Utilize estas opções para customizar a experiência da solução.', 'ppp-brasil' ),
+				),
+				'form_height'       => array(
+					'title'       => __( 'Altura do formulário', 'ppp-brasil' ),
+					'type'        => 'text',
+					'default'     => '',
+					'placeholder' => __( 'px', 'ppp-brasil' ),
+					'description' => __( 'Utilize esta opção para definir uma altura máxima do formulário de cartão de crédito (será considerado um valor em pixels). Será aceito um valor em pixels entre 400 - 550.', 'ppp-brasil' ),
 				),
 			);
 		}
@@ -278,11 +288,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 		 * @return string
 		 */
 		protected function get_log_view() {
-			if ( defined( 'WC_VERSION' ) && version_compare( WC_VERSION, '2.2', '>=' ) ) {
-				return '<a target="_blank" href="' . esc_url( admin_url( 'admin.php?page=wc-status&tab=logs&log_file=' . esc_attr( $this->id ) . '-' . sanitize_file_name( wp_hash( $this->id ) ) . '.log' ) ) . '">' . __( 'Status do Sistema &gt; Logs', 'ppp-brasil' ) . '</a>';
-			}
-
-			return '<code>woocommerce/logs/' . esc_attr( $this->id ) . '-' . sanitize_file_name( wp_hash( $this->id ) ) . '.txt</code>';
+			return '<a target="_blank" href="' . esc_url( admin_url( 'admin.php?page=wc-status&tab=logs&log_file=' . esc_attr( $this->id ) . '-' . sanitize_file_name( wp_hash( $this->id ) ) . '.log' ) ) . '">' . __( 'Status do Sistema &gt; Logs', 'ppp-brasil' ) . '</a>';
 		}
 
 		/**
@@ -290,9 +296,11 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 		 *
 		 * @param int $order_id
 		 *
-		 * @return array
+		 * @param bool $force
+		 *
+		 * @return null|array
 		 */
-		public function process_payment( $order_id ) {
+		public function process_payment( $order_id, $force = false ) {
 			$this->log( 'Processing payment for order #' . $order_id );
 			$order      = wc_get_order( $order_id );
 			$payment_id = WC()->session->get( 'wc-ppp-brasil-payment-id' );
@@ -301,7 +309,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			if ( isset( $_POST['wc-ppp-brasil-error'] ) && ! empty( $_POST['wc-ppp-brasil-error'] ) ) {
 				switch ( $_POST['wc-ppp-brasil-error'] ) {
 					case 'CARD_ATTEMPT_INVALID':
-						wc_add_notice( __( 'Número de tentativas excedidas, verifique o número do seu cartão de crédito.', 'ppp-brasil' ), 'error' );
+						wc_add_notice( __( 'Número de tentativas excedidas, por favor tente novamente. Se o erro persistir entre em contato.', 'ppp-brasil' ), 'error' );
 						break;
 					case 'INTERNAL_SERVICE_ERROR':
 					case 'SOCKET_HANG_UP':
@@ -330,7 +338,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$this->log( 'Error #' . $uid_error );
 				$this->log( 'Payment failed because an iframe error: ' . sanitize_text_field( $_POST['wc-ppp-brasil-error'] ) );
 
-				return;
+				return null;
 			}
 
 			// Prevent submit any dummy data.
@@ -338,7 +346,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				wc_add_notice( __( 'You are not allowed to do that.', 'ppp-brasil' ), 'error' );
 				$this->log( 'Payment failed because was trying to pay with dummy data.' );
 
-				return;
+				return null;
 			}
 
 			// Check the payment id
@@ -346,7 +354,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				wc_add_notice( __( 'Invalid payment ID.', 'ppp-brasil' ), 'error' );
 				$this->log( 'Payment failed because was trying to pay with invalid payment ID' );
 
-				return;
+				return null;
 			}
 
 			try {
@@ -362,7 +370,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					wc_add_notice( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato.', 'ppp-brasil' ), 'error' );
 					$this->log( 'Empty payer ID' );
 
-					return;
+					return null;
 				}
 
 				// Check if the payment id equal to stored
@@ -370,7 +378,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					wc_add_notice( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato.', 'ppp-brasil' ), 'error' );
 					$this->log( 'Payment failed because was trying to change the iframe response data with a new payment ID' );
 
-					return;
+					return null;
 				}
 
 				// execute the order here.
@@ -398,9 +406,6 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 						$order->update_status( 'on-hold', __( 'O pagamento está em revisão pelo PayPal.', 'ppp-brasil' ) );
 						$result_success = true;
 						break;
-					default:
-						$order->update_status( 'failed', __( 'Não foi possível executar o pagamento.', 'ppp-brasil' ) );
-						break;
 				}
 
 				if ( $result_success ) {
@@ -416,12 +421,33 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					);
 				}
 			} catch ( \PayPal\Exception\PayPalConnectionException $ex ) {
+				$data      = json_decode( $ex->getData(), true );
 				$uid_error = $this->unique_id();
-				wc_add_notice( sprintf( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato. Código: %s.', 'ppp-brasil' ), $uid_error ), 'error' );
-				$this->log( 'Error #' . $uid_error );
-				$this->log( 'Code: ' . $ex->getCode() );
-				$this->log( $ex->getMessage() );
-				$this->log( 'PayPalConnectionException: ' . $this->print_r( json_decode( $ex->getData(), true ), true ) );
+
+				switch ( $data['name'] ) {
+					// Repeat the execution
+					case 'INTERNAL_SERVICE_ERROR':
+						if ( $force ) {
+							$this->log( 'Error #' . $uid_error );
+							wc_add_notice( sprintf( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato. Código: %s.', 'ppp-brasil' ), $uid_error ), 'error' );
+						} else {
+							$this->process_payment( $order_id, true );
+						}
+						break;
+					case 'VALIDATION_ERROR':
+						wc_add_notice( sprintf( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato. Código: %s.', 'ppp-brasil' ), $uid_error ), 'error' );
+						$this->log( 'Error #' . $uid_error );
+						break;
+					case 'PAYMENT_ALREADY_DONE':
+						wc_add_notice( __( 'Já existe um pagamento para este pedido.', 'ppp-brasil' ), 'error' );
+						break;
+					default:
+						wc_add_notice( __( 'O seu pagamento não foi aprovado, por favor tente novamente.', 'ppp-brasil' ), 'error' );
+						break;
+				}
+
+				// Log anyway
+				$this->log( 'PayPalConnectionException: ' . $this->print_r( $ex->getMessage(), true ) );
 
 				return null;
 			} catch ( Exception $ex ) {
@@ -516,12 +542,16 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 		}
 
+		/** @noinspection PhpDocRedundantThrowsInspection */
+
 		/**
 		 * Execute a payment.
 		 *
 		 * @param $order WC_Order
 		 * @param $payment_id
 		 * @param $payer_id
+		 *
+		 * @throws \PayPal\Exception\PayPalConnectionException
 		 *
 		 * @return \PayPal\Api\Payment
 		 */
@@ -605,23 +635,23 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			);
 
 			if ( $order ) {
-				$billing_cellphone = get_post_meta( $this->woocommerce_3 ? $order->id : $order->get_id(), '_billing_cellphone', true );
-				$data['postcode']  = $this->woocommerce_3 ? $order->shipping_postcode : $order->get_shipping_postcode();
-				$data['address']   = $this->woocommerce_3 ? $order->shipping_address_1 : $order->get_shipping_address_1();
-				$data['address_2'] = $this->woocommerce_3 ? $order->shipping_address_2 : $order->get_shipping_address_2();
-				$data['city']      = $this->woocommerce_3 ? $order->shipping_city : $order->get_shipping_city();
-				$data['state']     = $this->woocommerce_3 ? $order->shipping_state : $order->get_shipping_state();
-				$data['country']   = $this->woocommerce_3 ? $order->shipping_country : $order->get_shipping_country();
+				$billing_cellphone = get_post_meta( $order->get_id(), '_billing_cellphone', true );
+				$data['postcode']  = $order->get_shipping_postcode();
+				$data['address']   = $order->get_shipping_address_1();
+				$data['address_2'] = $order->get_shipping_address_2();
+				$data['city']      = $order->get_shipping_city();
+				$data['state']     = $order->get_shipping_state();
+				$data['country']   = $order->get_shipping_country();
 
-				$data['neighborhood'] = get_post_meta( $this->woocommerce_3 ? $order->id : $order->get_id(), '_billing_neighborhood', true );
-				$data['number']       = get_post_meta( $this->woocommerce_3 ? $order->id : $order->get_id(), '_billing_number', true );
-				$data['first_name']   = $this->woocommerce_3 ? $order->billing_first_name : $order->get_billing_first_name();
-				$data['last_name']    = $this->woocommerce_3 ? $order->billing_last_name : $order->get_billing_last_name();
-				$data['person_type']  = get_post_meta( $this->woocommerce_3 ? $order->id : $order->get_id(), '_billing_persontype', true );
-				$data['cpf']          = get_post_meta( $this->woocommerce_3 ? $order->id : $order->get_id(), '_billing_cpf', true );
-				$data['cnpj']         = get_post_meta( $this->woocommerce_3 ? $order->id : $order->get_id(), '_billing_cnpj', true );
-				$data['phone']        = $billing_cellphone ? $billing_cellphone : ( $this->woocommerce_3 ? $order->billing_phone : $order->get_billing_phone() );
-				$data['email']        = $this->woocommerce_3 ? $order->billing_email : $order->get_billing_email();
+				$data['neighborhood'] = get_post_meta( $order->get_id(), '_billing_neighborhood', true );
+				$data['number']       = get_post_meta( $order->get_id(), '_billing_number', true );
+				$data['first_name']   = $order->get_billing_first_name();
+				$data['last_name']    = $order->get_billing_last_name();
+				$data['person_type']  = get_post_meta( $order->get_id(), '_billing_persontype', true );
+				$data['cpf']          = get_post_meta( $order->get_id(), '_billing_cpf', true );
+				$data['cnpj']         = get_post_meta( $order->get_id(), '_billing_cnpj', true );
+				$data['phone']        = $billing_cellphone ? $billing_cellphone : $order->get_billing_phone();
+				$data['email']        = $order->get_billing_email();
 			} else if ( $_POST ) {
 				$data['postcode']  = isset( $_POST['s_postcode'] ) ? preg_replace( '/[^0-9]/', '', $_POST['s_postcode'] ) : '';
 				$data['address']   = isset( $_POST['s_address'] ) ? sanitize_text_field( $_POST['s_address'] ) : '';
@@ -730,9 +760,9 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 				// Create the details.
 				$details      = new  \PayPal\Api\Details();
-				$amount_total += $order ? ( $this->woocommerce_3 ? $this->money_format( $order->order_shipping ) : $order->get_shipping_total() ) : $cart->shipping_total;
-				$details->setShipping( $order ? ( $this->woocommerce_3 ? $this->money_format( $order->order_shipping ) : $order->get_shipping_total() ) : $cart->shipping_total )
-				        ->setSubtotal( $order ? $order->get_subtotal() - ( $this->woocommerce_3 ? $this->money_format( $order->get_total_discount() ) : $order->get_discount_total() ) : $cart->subtotal - $cart->discount_cart );
+				$amount_total += $order ? $order->get_shipping_total() : $cart->shipping_total;
+				$details->setShipping( $order ? $order->get_shipping_total() : $cart->shipping_total )
+				        ->setSubtotal( $order ? $order->get_subtotal() - $order->get_discount_total() : $cart->subtotal - $cart->discount_cart );
 
 				// Create payment options.
 				$payment_options = new PayPal\Api\PaymentOptions();
@@ -945,18 +975,34 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 		public function checkout_scripts() {
 			// Just load this script in checkout and if isn't in order-receive.
 			if ( is_checkout() && ! get_query_var( 'order-received' ) ) {
-				wp_enqueue_script( 'ppp-script', '//www.paypalobjects.com/webstatic/ppplusdcc/ppplusdcc.min.js', array(), '1.0.0', true );
+				wp_enqueue_script( 'ppp-script', '//www.paypalobjects.com/webstatic/ppplusdcc/ppplusdcc.min.js', array(), '1.0.8', true );
 				wp_localize_script( 'ppp-script', 'wc_ppp_brasil_data', array(
-					'id'        => $this->id,
-					'order_pay' => ! ! get_query_var( 'order-pay' ),
-					'mode'      => $this->mode === 'sandbox' ? 'sandbox' : 'live',
-					'messages'  => array(
+					'id'          => $this->id,
+					'order_pay'   => ! ! get_query_var( 'order-pay' ),
+					'mode'        => $this->mode === 'sandbox' ? 'sandbox' : 'live',
+					'form_height' => $this->get_form_height(),
+					'messages'    => array(
 						'check_entry' => __( 'Verifique os dados informados e tente novamente', 'ppp-brasil' ),
 					),
 				) );
-				wp_enqueue_script( 'wc-ppp-brasil-script', plugins_url( 'assets/js/frontend.js', __DIR__ ), array( 'jquery' ), '1.0.0', true );
-				wp_enqueue_style( 'wc-ppp-brasil-style', plugins_url( 'assets/css/frontend.css', __DIR__ ), array(), '1.0.0', 'all' );
+				wp_enqueue_script( 'wc-ppp-brasil-script', plugins_url( 'assets/js/frontend.js', __DIR__ ), array( 'jquery' ), '1.0.8', true );
+				wp_enqueue_style( 'wc-ppp-brasil-style', plugins_url( 'assets/css/frontend.css', __DIR__ ), array(), '1.0.8', 'all' );
 			}
+		}
+
+		/**
+		 * Get form height.
+		 */
+		private function get_form_height() {
+			$height    = trim( $this->form_height );
+			$min_value = 400;
+			$max_value = 550;
+			$test      = preg_match( '/[0-9]+/', $height, $matches );
+			if ( $test && $matches[0] === $height && $height >= $min_value && $height <= $max_value ) {
+				return $height;
+			}
+
+			return null;
 		}
 
 		/**
@@ -968,7 +1014,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			$wc_screen_id   = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
 			$wc_settings_id = $wc_screen_id . '_page_wc-settings';
 			if ( $wc_settings_id === $screen_id && isset( $_GET['section'] ) && $_GET['section'] === $this->id ) {
-				wp_enqueue_style( 'wc-ppp-brasil-admin-style', plugins_url( 'assets/css/backend.css', __DIR__ ), array(), '1.0.0', 'all' );
+				wp_enqueue_style( 'wc-ppp-brasil-admin-style', plugins_url( 'assets/css/backend.css', __DIR__ ), array(), '1.0.8', 'all' );
 			}
 		}
 
@@ -1006,6 +1052,40 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 			// Add an ID to track this extension.
 			$api_context->addRequestHeader( "PayPal-Partner-Attribution-Id", 'WooCommerceBR_Ecom_PPPlus' );
+
+			return $api_context;
+		}
+
+		public function get_api_context_negative( $client_id = null, $client_secret = null, $mode = null ) {
+			// Autoload the SDK.
+			include_once dirname( __FILE__ ) . '/libs/PayPal-PHP-SDK/autoload.php';
+
+			// Set the instance client_id if not given.
+			if ( $client_id === null ) {
+				$client_id = $this->client_id;
+			}
+
+			// Set the instance client_secret if not given.
+			if ( $client_secret === null ) {
+				$client_secret = $this->client_secret;
+			}
+
+			// Set the instance sandbox if not given.
+			if ( $mode === null ) {
+				$mode = $this->mode;
+			}
+
+			// Create the credentials.
+			$credential         = new \PayPal\Auth\OAuthTokenCredential( $client_id, $client_secret );
+			$api_context        = new \PayPal\Rest\ApiContext( $credential );
+			$api_context_config = array(
+				'mode' => $mode === 'sandbox' ? 'sandbox' : 'live',
+			);
+			$api_context->setConfig( $api_context_config );
+
+			// Add an ID to track this extension.
+			$api_context->addRequestHeader( "PayPal-Partner-Attribution-Id", 'WooCommerceBR_Ecom_PPPlus' );
+			$api_context->addRequestHeader( "PayPal-Mock-Response", '{"mock_application_codes":"INSUFFICIENT_FUNDS"}' );
 
 			return $api_context;
 		}

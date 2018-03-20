@@ -30,7 +30,7 @@ class WC_PPP_Brasil_Checkout {
         window.addEventListener('message', this.messageListener, false);
         // Trigger update checkout on order pay page
         if (wc_ppp_brasil_data['order_pay']) {
-            jQuery(function($){
+            jQuery(function ($) {
                 jQuery('body').trigger('updated_checkout');
             });
         }
@@ -143,6 +143,7 @@ class WC_PPP_Brasil_Checkout {
                 'approvalUrl': data.approval_url,
                 'placeholder': 'wc-ppp-brasil-container',
                 'mode': wc_ppp_brasil_data['mode'],
+                'iframeHeight': wc_ppp_brasil_data['form_height'],
                 'payerFirstName': data.first_name,
                 'payerLastName': data.last_name,
                 'payerPhone': data.phone,
@@ -281,7 +282,7 @@ class WC_PPP_Brasil_Checkout {
 
             // Scroll to top
             jQuery('html, body').animate({
-                scrollTop: ( $form.offset().top - 100 )
+                scrollTop: ($form.offset().top - 100)
             }, 1000);
         }
 

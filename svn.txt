@@ -1,0 +1,11 @@
+# Add the trunk version files
+svn add tags/xxx
+
+# Commit files previous added
+svn commit -m "added files to version xxx"
+
+# Delete trunk files
+svn delete trunk/
+
+# Copy versio files to trunk
+svn copy tags/xxx trunk/
