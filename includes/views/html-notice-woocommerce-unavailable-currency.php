@@ -7,10 +7,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 global $woocommerce;
-$screen = get_current_screen();
-if ( $screen->id === 'woocommerce_page_wc-settings' ) {
-	return;
-}
 ?>
 
 <div class="error">
