@@ -88,6 +88,9 @@ if ( ! class_exists( 'WC_PPP_Brasil' ) ) {
 			if ( class_exists( 'WC_Payment_Gateway' ) ) {
 				include dirname( __FILE__ ) . '/includes/class-wc-ppp-brasil-gateway.php';
 				include dirname( __FILE__ ) . '/includes/class-wc-ppp-brasil-metabox.php';
+				if ( ! in_array( get_woocommerce_currency(), WC_PPP_Brasil::get_allowed_currencies() ) ) {
+					add_action( 'admin_notices', array( $this, 'woocommerce_unavailable_currency' ) );
+				}
 			} else {
 				add_action( 'admin_notices', array( $this, 'woocommerce_missing_notice' ) );
 			}
@@ -129,9 +132,13 @@ if ( ! class_exists( 'WC_PPP_Brasil' ) ) {
 			include dirname( __FILE__ ) . '/includes/views/html-notice-missing-woocommerce.php';
 		}
 
+		public function woocommerce_unavailable_currency() {
+			include dirname( __FILE__ ) . '/includes/views/html-notice-woocommerce-unavailable-currency.php';
+		}
+
 		public function woocommerce_wrong_version() {
 			if ( self::woocommerce_incompatible() ) {
-				include dirname( __FILE__ ) . '/includes/views/html-notice-wrong-version-woocommerc.php';
+				include dirname( __FILE__ ) . '/includes/views/html-notice-wrong-version-woocommerce.php';
 			}
 		}
 
@@ -159,6 +166,10 @@ if ( ! class_exists( 'WC_PPP_Brasil' ) ) {
 			$version = get_option( 'woocommerce_version' );
 
 			return version_compare( $version, '3.0.0', "<" );
+		}
+
+		public static function get_allowed_currencies() {
+			return array( 'BRL', 'USD' );
 		}
 
 	}
