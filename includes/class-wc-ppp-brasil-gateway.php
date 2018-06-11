@@ -812,7 +812,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 						$total_fees += $fee->amount;
 						$item       = new PayPal\Api\Item();
 						$items[]    = $item;
-						$item->setSku( $fee->id )
+						$item->setSku( sanitize_title( $fee->name ) )
 						     ->setName( $fee->name )
 						     ->setQuantity( 1 )
 						     ->setPrice( $fee->amount )
