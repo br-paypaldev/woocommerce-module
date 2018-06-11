@@ -12,6 +12,13 @@
         </p>
     </div>
 <?php endif; ?>
+<?php if ( get_woocommerce_currency() === 'USD' ): ?>
+    <div id="message-alert-usd" class="error inline">
+        <p>
+            <strong><?php _e( 'Você está utilizando USD em sua loja. Desta forma você só poderá receber pagamento de contas não-brasileiras.', 'ppp-brasil' ); ?></strong>
+        </p>
+    </div>
+<?php endif; ?>
 <img class="ppp-brasil-banner"
      src="<?php echo $this->plugin_url( 'assets/images/banner.png' ); ?>"
      title="PayPal Plus Brasil"
