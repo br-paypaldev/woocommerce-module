@@ -40,7 +40,6 @@ var WC_PPP_Brasil_Checkout = (function () {
          * @type {()=>any}
          */
         this.triggerUpdateCheckout = this.debounce(function () {
-            console.log('updating checkout');
             _this.$body.trigger('update_checkout');
         }, 500);
         /**
@@ -134,8 +133,8 @@ var WC_PPP_Brasil_Checkout = (function () {
             this.hideOverlay();
             // Show loading.
             this.showLoading();
-            // Instance the PPP.
-            this.instance = PAYPAL.apps.PPP({
+            // Settings
+            var settings = {
                 'approvalUrl': data.approval_url,
                 'placeholder': 'wc-ppp-brasil-container',
                 'mode': wc_ppp_brasil_data['mode'],
@@ -143,18 +142,25 @@ var WC_PPP_Brasil_Checkout = (function () {
                 'payerFirstName': data.first_name,
                 'payerLastName': data.last_name,
                 'payerPhone': data.phone,
-                'payerTaxId': data.person_type === '1' ? data.cpf : data.cnpj,
-                'payerTaxIdType': data.person_type === '1' ? 'BR_CPF' : 'BR_CNPJ',
-                'language': 'pt_BR',
-                'country': 'BR',
+                'language': wc_ppp_brasil_data.language,
+                'country': wc_ppp_brasil_data.country,
                 'payerEmail': data.email,
                 'rememberedCards': data.remembered_cards,
-            });
+            };
+            // Fill conditional data
+            if (wc_ppp_brasil_data.show_payer_tax_id) {
+                settings['payerTaxId'] = data.person_type === '1' ? data.cpf : data.cnpj;
+                settings['payerTaxIdType'] = data.person_type === '1' ? 'BR_CPF' : 'BR_CNPJ';
+            }
+            else {
+                settings['payerTaxId'] = '';
+            }
+            // Instance the PPP.
+            this.instance = PAYPAL.apps.PPP(settings);
         }
         else {
             this.$containerDummy.removeClass('hidden');
         }
-        window['teste'] = this.instance;
     };
     /**
      * Hide the overlay in container.

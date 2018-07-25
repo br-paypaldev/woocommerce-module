@@ -780,7 +780,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					$product_price += $order ? $item_data['line_tax'] / $item_data['qty'] : $item_data['line_tax'] / $item_data['quantity'];
 					$product_title = isset( $item_data['variation_id'] ) && $item_data['variation_id'] ? $product->get_title() . ' - ' . implode( ', ', $item_data['variation'] ) : $product->get_title();
 					$item->setName( $product_title )
-					     ->setCurrency( 'BRL' )
+					     ->setCurrency( get_woocommerce_currency() )
 					     ->setQuantity( $order ? $item_data['qty'] : $item_data['quantity'] )
 					     ->setPrice( $product_price )
 					     ->setSku( $product->get_sku() ? $product->get_sku() : $product->get_id() )
@@ -799,7 +799,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					     ->setName( __( 'Desconto', 'ppp-brasil' ) )
 					     ->setQuantity( 1 )
 					     ->setPrice( $discount * - 1 )
-					     ->setCurrency( 'BRL' );
+					     ->setCurrency( get_woocommerce_currency() );
 
 					$amount_total += $discount * - 1;
 				}
@@ -816,7 +816,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 						     ->setName( $fee->name )
 						     ->setQuantity( 1 )
 						     ->setPrice( $fee->amount )
-						     ->setCurrency( 'BRL' );
+						     ->setCurrency( get_woocommerce_currency() );
 					}
 					if ( $total_fees ) {
 						$details->setSubtotal( (float) $details->getSubtotal() + $total_fees );
@@ -826,7 +826,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 				// Create the amount.
 				$amount = new \PayPal\Api\Amount();
-				$amount->setCurrency( 'BRL' )
+				$amount->setCurrency( get_woocommerce_currency() )
 				       ->setTotal( $amount_total )
 				       ->setDetails( $details );
 
@@ -977,17 +977,38 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			if ( is_checkout() && ! get_query_var( 'order-received' ) ) {
 				wp_enqueue_script( 'ppp-script', '//www.paypalobjects.com/webstatic/ppplusdcc/ppplusdcc.min.js', array(), '1.0.8', true );
 				wp_localize_script( 'ppp-script', 'wc_ppp_brasil_data', array(
-					'id'          => $this->id,
-					'order_pay'   => ! ! get_query_var( 'order-pay' ),
-					'mode'        => $this->mode === 'sandbox' ? 'sandbox' : 'live',
-					'form_height' => $this->get_form_height(),
-					'messages'    => array(
+					'id'                => $this->id,
+					'order_pay'         => ! ! get_query_var( 'order-pay' ),
+					'mode'              => $this->mode === 'sandbox' ? 'sandbox' : 'live',
+					'form_height'       => $this->get_form_height(),
+					'show_payer_tax_id' => get_woocommerce_currency() === 'BRL',
+					'language'          => $this->get_woocommerce_language(),
+					'country'           => $this->get_woocommerce_country(),
+					'messages'          => array(
 						'check_entry' => __( 'Verifique os dados informados e tente novamente', 'ppp-brasil' ),
 					),
 				) );
 				wp_enqueue_script( 'wc-ppp-brasil-script', plugins_url( 'assets/js/frontend.js', __DIR__ ), array( 'jquery' ), '1.0.8', true );
 				wp_enqueue_style( 'wc-ppp-brasil-style', plugins_url( 'assets/css/frontend.css', __DIR__ ), array(), '1.0.8', 'all' );
 			}
+		}
+
+		/**
+		 * Get the WooCommerce country.
+		 *
+		 * @return string
+		 */
+		private function get_woocommerce_country() {
+			return get_woocommerce_currency() === 'BRL' ? 'BR' : 'US';
+		}
+
+		/**
+		 * Get the WooCommerce language.
+		 *
+		 * @return string
+		 */
+		private function get_woocommerce_language() {
+			return get_woocommerce_currency() === 'BRL' ? 'pt_BR' : 'en_US';
 		}
 
 		/**
