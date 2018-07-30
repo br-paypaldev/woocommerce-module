@@ -18,6 +18,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 	 * @property WC_Logger log
 	 * @property string wrong_credentials
 	 * @property string form_height
+	 * @property string invoice_id_prefix
 	 */
 	class WC_PPP_Brasil_Gateway extends WC_Payment_Gateway {
 
@@ -45,6 +46,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			$this->debug             = $this->get_option( 'debug' );
 			$this->wrong_credentials = $this->get_option( 'wrong_credentials' );
 			$this->form_height       = $this->get_option( 'form_height' );
+			$this->invoice_id_prefix = $this->get_option( 'invoice_id_prefix', 'WC-PPP-' );
 
 			// Active logs.
 			if ( 'yes' == $this->debug ) {
@@ -278,6 +280,12 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					'default'     => '',
 					'placeholder' => __( 'px', 'ppp-brasil' ),
 					'description' => __( 'Utilize esta opção para definir uma altura máxima do formulário de cartão de crédito (será considerado um valor em pixels). Será aceito um valor em pixels entre 400 - 550.', 'ppp-brasil' ),
+				),
+				'invoice_id_prefix' => array(
+					'title'       => __( 'Prefixo de Invoice ID', 'ppp-brasil' ),
+					'type'        => 'text',
+					'default'     => '',
+					'description' => __( 'Adicione um prefixo ao Invoice ID das compras feitas com PayPal Plus na sua loja. Isso pode auxiliar em problemas de Invoice duplicado caso trabalhe com a mesma conta PayPal em mais de um site.', 'ppp-brasil' ),
 				),
 			);
 		}
@@ -564,7 +572,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			$patchAddInvoiceNumber = new \PayPal\Api\Patch();
 			$patchAddInvoiceNumber->setOp( 'add' )
 			                      ->setPath( '/transactions/0/invoice_number' )
-			                      ->setValue( $order->get_id() );
+			                      ->setValue( $this->invoice_id_prefix . $order->get_id() );
 
 			// Add the description with order ID.
 			$patchAddDescription = new \PayPal\Api\Patch();
