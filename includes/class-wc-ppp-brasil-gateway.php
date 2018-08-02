@@ -46,7 +46,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			$this->debug             = $this->get_option( 'debug' );
 			$this->wrong_credentials = $this->get_option( 'wrong_credentials' );
 			$this->form_height       = $this->get_option( 'form_height' );
-			$this->invoice_id_prefix = $this->get_option( 'invoice_id_prefix', 'WC-PPP-' );
+			$this->invoice_id_prefix = $this->get_option( 'invoice_id_prefix', '' );
 
 			// Active logs.
 			if ( 'yes' == $this->debug ) {
