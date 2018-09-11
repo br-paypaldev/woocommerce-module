@@ -3,7 +3,7 @@
 /**
  * Plugin Name: PayPal Plus Brasil
  * Description: Adicione o checkout transparente do PayPal ao seu checkout.
- * Version: 1.0.9
+ * Version: 1.1
  * Author: PayPal
  * Author URI: https://paypal.com.br
  * Requires at least: 4.4
@@ -26,6 +26,8 @@ if ( ! class_exists( 'WC_PPP_Brasil' ) ) {
 	 * Class WC_PPP_Brasil.
 	 */
 	class WC_PPP_Brasil {
+
+		public static $VERSION = '1.1';
 
 		/**
 		 * Current plugin instance.
