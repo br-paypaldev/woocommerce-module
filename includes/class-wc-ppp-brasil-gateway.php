@@ -847,7 +847,21 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 				// Create the address.
 				if ( ! $dummy ) {
-					$address_line_1 = $data['address'] . ', ' . $data['number'] . ( $data['address_2'] ? ', ' . $data['address_2'] : '' );
+
+					if ( $data['address_2'] ) {
+						if ( $data['number'] ) {
+							$address_line_1 = sprintf( '%s, %s, %s', $data['address'], $data['number'], $data['address_2'] );
+						} else {
+							$address_line_1 = sprintf( '%s, %s', $data['address'], $data['address_2'] );
+						}
+					} else {
+						if ( $data['number'] ) {
+							$address_line_1 = sprintf( '%s, %s', $data['address'], $data['number'] );
+						} else {
+							$address_line_1 = sprintf( '%s', $data['address'] );
+						}
+					}
+
 					$address_line_2 = $data['neighborhood'];
 
 					$shipping_address = new \PayPal\Api\ShippingAddress();
