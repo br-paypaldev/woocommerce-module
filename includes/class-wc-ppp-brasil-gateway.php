@@ -1009,7 +1009,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					'mode'              => $this->mode === 'sandbox' ? 'sandbox' : 'live',
 					'form_height'       => $this->get_form_height(),
 					'show_payer_tax_id' => get_woocommerce_currency() === 'BRL',
-					'language'          => $this->get_woocommerce_language(),
+					'language'          => $this->get_locale(),
 					'country'           => $this->get_woocommerce_country(),
 					'messages'          => array(
 						'check_entry' => __( 'Verifique os dados informados e tente novamente', 'ppp-brasil' ),
@@ -1028,15 +1028,6 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 		 */
 		private function get_woocommerce_country() {
 			return get_woocommerce_currency() === 'BRL' ? 'BR' : 'US';
-		}
-
-		/**
-		 * Get the WooCommerce language.
-		 *
-		 * @return string
-		 */
-		private function get_woocommerce_language() {
-			return get_locale();
 		}
 
 		/**
