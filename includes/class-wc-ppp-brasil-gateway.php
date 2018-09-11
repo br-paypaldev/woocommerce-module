@@ -217,7 +217,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 		}
 
 		private function get_webhook_url() {
-			$base_url = home_url( '/' );
+			$base_url = site_url();
 			if ( $_SERVER['HTTP_HOST'] === 'localhost' ) {
 				$base_url = 'https://example.com/';
 			}
