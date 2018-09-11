@@ -77,20 +77,23 @@ var WC_PPP_Brasil_Checkout = (function () {
             _this.$containerDummy = jQuery('#wc-ppp-brasil-container-dummy');
             _this.$overlay.on('click', '[data-action=update-checkout]', _this.updateCheckout);
             _this.showOverlay();
+            var inputData = _this.$inputData.val();
             try {
-                var data = JSON.parse(_this.$inputData.val());
-                _this.log('info', 'Creating iframe with data:');
-                _this.log('data', data);
-                if (data.invalid.length !== 0) {
-                    _this.log('error', "There's some invalid data. Iframe will render dummy version:");
-                    _this.log('data', data.invalid);
+                if (inputData) {
+                    var data = JSON.parse(inputData);
+                    _this.log('info', 'Creating iframe with data:');
+                    _this.log('data', data);
+                    if (data.invalid.length !== 0) {
+                        _this.log('error', "There's some invalid data. Iframe will render dummy version:");
+                        _this.log('data', data.invalid);
+                    }
+                    _this.createIframe(data);
                 }
-                _this.createIframe(data);
             }
             catch (error) {
                 _this.log('error', 'There was some error creating the iframe.');
                 _this.log('info', 'Data received:');
-                _this.log('data', _this.$inputData.val());
+                _this.log('data', inputData);
                 _this.log('info', 'Error:');
                 _this.log('data', error);
             }
