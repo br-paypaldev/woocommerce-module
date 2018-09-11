@@ -1008,7 +1008,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					'order_pay'         => ! ! get_query_var( 'order-pay' ),
 					'mode'              => $this->mode === 'sandbox' ? 'sandbox' : 'live',
 					'form_height'       => $this->get_form_height(),
-					'show_payer_tax_id' => get_woocommerce_currency() === 'BRL',
+					'show_payer_tax_id' => pppbr_needs_cpf(),
 					'language'          => $this->get_locale(),
 					'country'           => $this->get_woocommerce_country(),
 					'messages'          => array(
