@@ -869,10 +869,14 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					                 ->setCountryCode( $data['country'] )
 					                 ->setPostalCode( $data['postcode'] )
 					                 ->setLine1( $address_line_1 )
-					                 ->setLine2( $address_line_2 )
 					                 ->setCity( $data['city'] )
 					                 ->setState( $data['state'] )
 					                 ->setPhone( $data['phone'] );
+
+					if ( $address_line_2 ) {
+						$shipping_address->setLine2( $address_line_2 );
+					}
+
 					$item_list->setShippingAddress( $shipping_address );
 				}
 
