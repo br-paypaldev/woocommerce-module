@@ -211,6 +211,8 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 			$webhook->setEventTypes( $webhook_events_types );
 
+			$this->log( 'Request to webhook: ' . $this->print_r( $webhook->toArray(), true ) );
+
 			return $webhook->create( $api_context );
 		}
 
