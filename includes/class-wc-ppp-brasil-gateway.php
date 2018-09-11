@@ -1129,7 +1129,6 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 		 */
 		public function webhook_handler() {
 			// Include the handler.
-			include_once dirname( __FILE__ ) . '/functions.php';
 			include_once dirname( __FILE__ ) . '/class-wc-ppp-brasil-webhooks-handler.php';
 
 			try {

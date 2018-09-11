@@ -79,7 +79,7 @@ if ( ! class_exists( 'WC_PPP_Brasil' ) ) {
 		 * Includes for the plugin.
 		 */
 		public function includes() {
-
+			include_once dirname( __FILE__ ) . '/includes/functions.php';
 		}
 
 		/**
