@@ -138,7 +138,6 @@ class WC_PPP_Brasil_Checkout {
         if (event) {
             event.preventDefault();
         }
-        this.log('info', 'Updaing checkout...');
         this.triggerUpdateCheckout();
     };
 
@@ -149,6 +148,7 @@ class WC_PPP_Brasil_Checkout {
      * @type {()=>any}
      */
     triggerUpdateCheckout = this.debounce(() => {
+        this.log('info', 'Updating checkout...');
         this.$body.trigger('update_checkout');
     }, 500);
 

@@ -50,7 +50,6 @@ var WC_PPP_Brasil_Checkout = (function () {
             if (event) {
                 event.preventDefault();
             }
-            _this.log('info', 'Updaing checkout...');
             _this.triggerUpdateCheckout();
         };
         /**
@@ -59,6 +58,7 @@ var WC_PPP_Brasil_Checkout = (function () {
          * @type {()=>any}
          */
         this.triggerUpdateCheckout = this.debounce(function () {
+            _this.log('info', 'Updating checkout...');
             _this.$body.trigger('update_checkout');
         }, 500);
         /**

@@ -6,8 +6,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$error = false;
-$data  = null;
+$error      = false;
+$data       = null;
+$data_error = null;
 
 try {
 	$data = $this->get_posted_data();
@@ -15,7 +16,7 @@ try {
 	$error = $ex->getMessage();
 	wc_add_notice( $error );
 	if ( $ex->data ) {
-		$data = $ex->data;
+		$data_error = $ex->data;
 	}
 }
 ?>
@@ -23,7 +24,7 @@ try {
 	<?php if ( $error ): ?>
         <p><?php echo $error; ?></p>
         <input type="hidden" id="wc-ppp-brasil-api-error-data" name="wc-ppp-brasil-data"
-               value="<?php echo htmlentities( json_encode( $data ) ); ?>">
+               value="<?php echo htmlentities( json_encode( $data_error ) ); ?>">
 	<?php else: ?>
         <input type="hidden" id="wc-ppp-brasil-data" name="wc-ppp-brasil-data"
                value="<?php echo htmlentities( json_encode( $data ) ); ?>">
