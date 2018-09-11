@@ -959,19 +959,24 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$errors['email'] = __( 'Email inválido', 'ppp-brasil' );
 			}
 
-			// Check person type.
-			if ( $data['person_type'] !== '1' && $data['person_type'] !== '2' ) {
-				$errors['person_type'] = __( 'Tipo de pessoa inválido', 'ppp-brasil' );
-			}
+			// Only if require CPF/CNPJ
+			if ( pppbr_needs_cpf() ) {
 
-			// Check the CPF
-			if ( $data['person_type'] == '1' && ! $this->is_cpf( $data['cpf'] ) ) {
-				$errors['cpf'] = __( 'CPF inválido', 'ppp-brasil' );
-			}
+				// Check person type.
+				if ( $data['person_type'] !== '1' && $data['person_type'] !== '2' ) {
+					$errors['person_type'] = __( 'Tipo de pessoa inválido', 'ppp-brasil' );
+				}
 
-			// Check the CNPJ
-			if ( $data['person_type'] == '2' && ! $this->is_cnpj( $data['cnpj'] ) ) {
-				$errors['cnpj'] = __( 'CNPJ inválido', 'ppp-brasil' );
+				// Check the CPF
+				if ( $data['person_type'] == '1' && ! $this->is_cpf( $data['cpf'] ) ) {
+					$errors['cpf'] = __( 'CPF inválido', 'ppp-brasil' );
+				}
+
+				// Check the CNPJ
+				if ( $data['person_type'] == '2' && ! $this->is_cnpj( $data['cnpj'] ) ) {
+					$errors['cnpj'] = __( 'CNPJ inválido', 'ppp-brasil' );
+				}
+
 			}
 
 			return $errors;
