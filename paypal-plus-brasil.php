@@ -120,7 +120,12 @@ if ( ! class_exists( 'WC_PPP_Brasil' ) ) {
 		 * WooCommerce Extra Checkout Fields for Brazil notice.
 		 */
 		public function ecfb_missing_notice() {
-			if ( ! class_exists( 'Extra_Checkout_Fields_For_Brazil' ) ) {
+			// If WooCommerce not installed, ignore this notice.
+			if ( ! function_exists( 'get_woocommerce_currency' ) ) {
+				return;
+			}
+			// Check if Extra Checkout Fields for Brazil is installed, but check if it's BRL.
+			if ( ! class_exists( 'Extra_Checkout_Fields_For_Brazil' ) && get_woocommerce_currency() === "BRL" ) {
 				include dirname( __FILE__ ) . '/includes/views/html-notice-missing-ecfb.php';
 			}
 		}
