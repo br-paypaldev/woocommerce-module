@@ -1036,7 +1036,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 		 * @return string
 		 */
 		private function get_woocommerce_language() {
-			return get_woocommerce_currency() === 'BRL' ? 'pt_BR' : 'en_US';
+			return get_locale();
 		}
 
 		/**
