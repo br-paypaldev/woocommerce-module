@@ -498,7 +498,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 					// Refund amount.
 					$refund_amount = new \PayPal\Api\Amount();
-					$refund_amount->setCurrency( 'BRL' )
+					$refund_amount->setCurrency( get_woocommerce_currency() )
 					              ->setTotal( $amount );
 
 					// Refund request.
