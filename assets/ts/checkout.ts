@@ -171,6 +171,13 @@ class WC_PPP_Brasil_Checkout {
 
         const inputData = this.$inputData.val();
 
+        const phpErrorData = jQuery('#wc-ppp-brasil-api-error-data').val();
+
+        if (phpErrorData) {
+            this.log('error', 'There was an error with following data:');
+            this.log('data', JSON.parse(phpErrorData));
+        }
+
         try {
             if (inputData) {
                 const data = JSON.parse(inputData);

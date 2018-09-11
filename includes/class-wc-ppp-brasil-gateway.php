@@ -684,13 +684,15 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$data['email']        = isset( $post_data['billing_email'] ) ? sanitize_text_field( $post_data['billing_email'] ) : '';
 			}
 
-			// Get wcbcf settings
-			$wcbcf_settings = get_option( 'wcbcf_settings' );
-			// Set the person type default if we don't have any person type defined
-			if ( $wcbcf_settings && ! $data['person_type'] && ( $wcbcf_settings['person_type'] == '2' || $wcbcf_settings['person_type'] == '3' ) ) {
-				// The value 2 from person_type in settings is CPF (1) and 3 is CNPJ (2), and 1 is both, that won't reach here.
-				$data['person_type']         = $wcbcf_settings['person_type'] == '2' ? '1' : '2';
-				$data['person_type_default'] = true;
+			if ( pppbr_needs_cpf() ) {
+				// Get wcbcf settings
+				$wcbcf_settings = get_option( 'wcbcf_settings' );
+				// Set the person type default if we don't have any person type defined
+				if ( $wcbcf_settings && ! $data['person_type'] && ( $wcbcf_settings['person_type'] == '2' || $wcbcf_settings['person_type'] == '3' ) ) {
+					// The value 2 from person_type in settings is CPF (1) and 3 is CNPJ (2), and 1 is both, that won't reach here.
+					$data['person_type']         = $wcbcf_settings['person_type'] == '2' ? '1' : '2';
+					$data['person_type_default'] = true;
+				}
 			}
 
 			// Now set the invalid.
@@ -761,6 +763,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			$order    = $order_id ? wc_get_order( $order_id ) : false;
 			$cart     = WC()->cart;
 			$this->log( 'Creating payment' );
+			$exception_data = array();
 			try {
 
 				// Store the amount_total, so this will always have the correct total.
@@ -901,12 +904,19 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			} catch ( \PayPal\Exception\PayPalConnectionException $ex ) { // Catch any PayPal error.
 				$this->log( 'Code: ' . $ex->getCode() );
 				$this->log( $ex->getMessage() );
-				$this->log( 'PayPalConnectionException: ' . $this->print_r( json_decode( $ex->getData(), true ), true ) );
+				$error_data = json_decode( $ex->getData(), true );
+				$this->log( 'PayPalConnectionException: ' . $this->print_r( $error_data, true ) );
+				if ( $error_data['name'] === 'VALIDATION_ERROR' ) {
+					$exception_data = $error_data['details'];
+				}
 			} catch ( Exception $ex ) { // Catch any other error.
 				$this->log( 'PHP Error: ' . $this->print_r( $ex->getMessage(), true ) );
 			}
 
-			throw new Exception( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato', 'ppp-brasil' ) );
+			$exception       = new Exception( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato.', 'ppp-brasil' ) );
+			$exception->data = $exception_data;
+
+			throw $exception;
 		}
 
 		/**

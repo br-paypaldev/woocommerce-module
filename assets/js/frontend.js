@@ -78,6 +78,11 @@ var WC_PPP_Brasil_Checkout = (function () {
             _this.$overlay.on('click', '[data-action=update-checkout]', _this.updateCheckout);
             _this.showOverlay();
             var inputData = _this.$inputData.val();
+            var phpErrorData = jQuery('#wc-ppp-brasil-api-error-data').val();
+            if (phpErrorData) {
+                _this.log('error', 'There was an error with following data:');
+                _this.log('data', JSON.parse(phpErrorData));
+            }
             try {
                 if (inputData) {
                     var data = JSON.parse(inputData);

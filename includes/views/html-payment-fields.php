@@ -14,11 +14,16 @@ try {
 } catch ( Exception $ex ) {
 	$error = $ex->getMessage();
 	wc_add_notice( $error );
+	if ( $ex->data ) {
+		$data = $ex->data;
+	}
 }
 ?>
 <div id="wc-ppb-brasil-wrappers">
 	<?php if ( $error ): ?>
         <p><?php echo $error; ?></p>
+        <input type="hidden" id="wc-ppp-brasil-api-error-data" name="wc-ppp-brasil-data"
+               value="<?php echo htmlentities( json_encode( $data ) ); ?>">
 	<?php else: ?>
         <input type="hidden" id="wc-ppp-brasil-data" name="wc-ppp-brasil-data"
                value="<?php echo htmlentities( json_encode( $data ) ); ?>">
