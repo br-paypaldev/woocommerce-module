@@ -1038,7 +1038,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					'mode'              => $this->mode === 'sandbox' ? 'sandbox' : 'live',
 					'form_height'       => $this->get_form_height(),
 					'show_payer_tax_id' => pppbr_needs_cpf(),
-					'language'          => get_locale(),
+					'language'          => get_woocommerce_currency() === 'BRL' ? 'pt_BR' : 'en_US',
 					'country'           => $this->get_woocommerce_country(),
 					'messages'          => array(
 						'check_entry' => __( 'Verifique os dados informados e tente novamente', 'ppp-brasil' ),
