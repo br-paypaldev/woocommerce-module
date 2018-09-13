@@ -213,7 +213,6 @@ class WC_PPP_Brasil_Checkout {
                 'approvalUrl': data.approval_url,
                 'placeholder': 'wc-ppp-brasil-container',
                 'mode': wc_ppp_brasil_data['mode'],
-                'iframeHeight': wc_ppp_brasil_data['form_height'],
                 'payerFirstName': data.first_name,
                 'payerLastName': data.last_name,
                 'payerPhone': data.phone,
@@ -222,6 +221,9 @@ class WC_PPP_Brasil_Checkout {
                 'payerEmail': data.email,
                 'rememberedCards': data.remembered_cards,
             };
+            if (wc_ppp_brasil_data['form_height']) {
+                settings['iframeHeight'] = wc_ppp_brasil_data['form_height'];
+            }
             // Fill conditional data
             if (wc_ppp_brasil_data.show_payer_tax_id) {
                 settings['payerTaxId'] = data.person_type === '1' ? data.cpf : data.cnpj;
