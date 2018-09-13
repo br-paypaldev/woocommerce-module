@@ -989,6 +989,10 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$errors['country'] = __( 'País inválido', 'ppp-brasil' );
 			}
 
+			if ( empty( $data['postcode'] ) ) {
+				$errors['postcode'] = __( 'CEP inválido', 'ppp-brasil' );
+			}
+
 			// Check email.
 			if ( ! is_email( $data['email'] ) ) {
 				$errors['email'] = __( 'Email inválido', 'ppp-brasil' );
