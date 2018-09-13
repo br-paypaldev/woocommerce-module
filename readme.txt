@@ -68,7 +68,6 @@ Caso tenha alguma dúvida ou dificuldade na utilização do plugin acesse a seç
 
 1. Exemplo de dados não preenchidos no tema Storefront.
 2. Exemplo de checkout com cartão de crédito salvo no tema Storefront.
-3. Exemplo de primeira compra com cartão de crédito no tema Storefront.
 
 == Changelog ==
 

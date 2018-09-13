@@ -184,7 +184,7 @@ module.exports = function (grunt) {
         // Create README.md for GitHub.
         wp_readme_to_markdown: {
             options: {
-                screenshot_url: 'http://ps.w.org/<%= pkg.name %>/assets/{screenshot}.png'
+                screenshot_url: 'http://ps.w.org/<%= pkg.name %>/assets/{screenshot}.jpg'
             },
             dest: {
                 files: {
