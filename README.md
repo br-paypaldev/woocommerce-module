@@ -67,13 +67,10 @@ Caso tenha alguma dúvida ou dificuldade na utilização do plugin acesse a seç
 ## Screenshots ##
 
 ### 1. Exemplo de dados não preenchidos no tema Storefront. ###
-![Exemplo de dados não preenchidos no tema Storefront.](http://ps.w.org/paypal-plus-brasil/assets/screenshot-1.png)
+![Exemplo de dados não preenchidos no tema Storefront.](http://ps.w.org/paypal-plus-brasil/assets/screenshot-1.jpg)
 
 ### 2. Exemplo de checkout com cartão de crédito salvo no tema Storefront. ###
-![Exemplo de checkout com cartão de crédito salvo no tema Storefront.](http://ps.w.org/paypal-plus-brasil/assets/screenshot-2.png)
-
-### 3. Exemplo de primeira compra com cartão de crédito no tema Storefront. ###
-![Exemplo de primeira compra com cartão de crédito no tema Storefront.](http://ps.w.org/paypal-plus-brasil/assets/screenshot-3.png)
+![Exemplo de checkout com cartão de crédito salvo no tema Storefront.](http://ps.w.org/paypal-plus-brasil/assets/screenshot-2.jpg)
 
 
 ## Changelog ##
