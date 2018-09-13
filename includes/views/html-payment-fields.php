@@ -34,14 +34,26 @@ try {
             <div class="paypal-loading"></div>
         </div>
         <div id="wc-ppp-brasil-container-dummy" class="hidden">
-			<?php include 'html-paypal-iframe.php'; ?>
+			<?php
+			if ( get_woocommerce_currency() === 'BRL' ) {
+				include dirname( __FILE__ ) . '/html-paypal-iframe-br.php';
+			} else {
+				include dirname( __FILE__ ) . '/html-paypal-iframe-us.php';
+			}
+			?>
         </div>
         <div id="wc-ppp-brasil-container"></div>
         <div id="wc-ppb-brasil-container-overlay" class="hidden">
             <div class="icon-lock"></div>
             <div class="text">
-                <p><?php _e( 'Favor preencher corretamente as informações dos passos anteriores.', 'ppp-brasil' ); ?></p>
-                <p><?php _e( 'Caso já tenha preenchido, <a href="#" data-action="update-checkout">clique aqui</a>.', 'ppp-brasil' ); ?></p>
+				<?php
+				$string1_br = 'Favor preencher corretamente as informações dos passos anteriores.';
+				$string2_br = 'Caso já tenha preenchido, <a href="#" data-action="update-checkout">clique aqui</a>.';
+				$string1_us = 'Please fill correctly the previously asked information.';
+				$string2_us = 'If they are already filled,  <a href="#" data-action="update-checkout">click here</a>.';
+				echo sprintf( '<p>%s</p>', get_woocommerce_currency() === 'BRL' ? $string1_br : $string1_us );
+				echo sprintf( '<p>%s</p>', get_woocommerce_currency() === 'BRL' ? $string2_br : $string2_us );
+				?>
             </div>
         </div>
 	<?php endif; ?>
