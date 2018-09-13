@@ -26,6 +26,7 @@ use PayPal\Rest\ApiContext;
  * @property string failure_reason
  * @property string create_time
  * @property string update_time
+ * @property \PayPal\Api\ApplicationContext application_context
  * @property \PayPal\Api\Links[] links
  */
 class Payment extends PayPalResourceModel
@@ -543,6 +544,26 @@ class Payment extends PayPalResourceModel
     public function getApprovalLink()
     {
         return $this->getLink(PayPalConstants::APPROVAL_URL);
+    }
+
+	/**
+	 * @param \PayPal\Api\ApplicationContext $application_context
+	 *
+	 * @return $this
+	 */
+	public function setApplicationContext($application_context) {
+		$this->application_context = $application_context;
+
+		return $this;
+    }
+
+	/**
+	 * Get the application context.
+	 *
+	 * @return \PayPal\Api\ApplicationContext
+	 */
+    public function getApplicationContext() {
+    	return $this->application_context;
     }
 
     /**

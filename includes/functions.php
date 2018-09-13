@@ -20,3 +20,9 @@ if ( ! function_exists( 'getallheaders' ) ) {
 		return $headers;
 	}
 }
+
+if ( ! function_exists( 'pppbr_needs_cpf' ) ) {
+	function pppbr_needs_cpf() {
+		return function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() === 'BRL' : false;
+	}
+}

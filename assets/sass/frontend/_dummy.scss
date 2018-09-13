@@ -19,6 +19,10 @@
     }
   }
 
+  .ppp-container {
+    display: flex;
+  }
+
   .ppp-dummy-card-list {
     margin-bottom: 8px;
     border-radius: 3px;
@@ -49,6 +53,9 @@
       }
       &.elo {
         background-position: -288px -13px;
+      }
+      &.disc {
+        background-position: 0px -72px;
       }
     }
   }

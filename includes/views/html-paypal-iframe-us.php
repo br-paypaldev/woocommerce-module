@@ -1,5 +1,5 @@
 <?php
-$cards = array( 'visa', 'hipercard', 'mcard', 'elo', 'amex', 'hiper' );
+$cards = array( 'mcard', 'visa', 'amex', 'disc' );
 shuffle( $cards );
 ?>
 <div id="ppp-dummy">
@@ -13,40 +13,56 @@ shuffle( $cards );
     </div>
     <div class="ppp-dummy-card-input">
         <div class="ppp-dummy-input-credit-card ppp-dummy-input-credit-card-generic">
-            <input type="text" placeholder="Número do cartão">
+            <input type="text" placeholder="Card number">
             <span class="ppp-dummy-card-input-icon"></span>
         </div>
     </div>
     <div class="ppp-dummy-row">
+        <label class="ppp-dummy-label">Name of card holder</label>
+        <div class="ppp-container">
+            <div class="ppp-dummy-half">
+                <div class="ppp-dummy-input-credit-card ppp-dummy-input-credit-card-ccv">
+                    <input type="text" placeholder="Name">
+                </div>
+            </div>
+            <div class="ppp-dummy-half">
+                <div class="ppp-dummy-input-credit-card ppp-dummy-input-credit-card-ccv">
+                    <input type="text" placeholder="Last name">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="ppp-dummy-row">
         <div class="ppp-dummy-half">
-            <label class="ppp-dummy-label">Vencimento</label>
+            <label class="ppp-dummy-label">Expires</label>
             <div class="ppp-dummy-flex">
                 <div class="ppp-dummy-input-dropdown">
                     <input type="text" value="MM">
                 </div>
                 <div class="ppp-dummy-input-dropdown">
-                    <input type="text" value="DD">
+                    <input type="text" value="YY">
                 </div>
             </div>
         </div>
         <div class="ppp-dummy-half">
-            <label class="ppp-dummy-label">Cód Seg</label>
+            <label class="ppp-dummy-label">CSC</label>
             <div class="ppp-dummy-input-credit-card ppp-dummy-input-credit-card-ccv">
-                <input type="text" placeholder="3 dígitos">
+                <input type="text" placeholder="3 digits">
                 <span class="ppp-dummy-card-input-icon"></span>
             </div>
         </div>
     </div>
     <div class="ppp-dummy-installments">
         <div class="ppp-dummy-input-dropdown">
-            <input type="text" value="Selecionar parcelas para esta compra">
+			<?php $formatted_price = sprintf( get_woocommerce_price_format(), get_woocommerce_currency_symbol(), WC()->cart->total ); ?>
+            <input type="text" value="1x of <?php echo $formatted_price; ?>">
         </div>
     </div>
     <div class="ppp-dummy-politice">
-        <p>Suas informações serão coletadas de acordo com a <a href="#">Política de Privacidade do PayPal</a>.</p>
+        <p>Your information will be collected in accordance with the <a href="#">PayPal Privacy Policy</a>.</p>
     </div>
     <div class="ppp-dummy-newsletter">
         <span class="fake-checkbox"></span>
-        <p>Eu quero receber informações importantes, ofertas especiais e descontos do PayPal.</p>
+        <p>I want to receive important information, special offers and discounts from PayPal.</p>
     </div>
 </div>
