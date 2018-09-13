@@ -2,10 +2,12 @@
 **Contributors:** [apuhlmann](https://profiles.wordpress.org/apuhlmann)  
 **Tags:** paypal, paypal plus, woocommerce, woo commerce, checkout transparente, transparente, pagamento, gateway, paypal brasil, ecommerce, e-commerce  
 **Requires at least:** 4.4  
-**Tested up to:** 4.8  
-**Stable tag:** 1.0.2  
+**Tested up to:** 4.9  
+**Stable tag:** 1.2  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
+**WC requires at least:** 3.0  
+**WC tested up to:** 3.4  
 
 Adicione facilmente opções de pagamento do PayPal Plus ao seu site do WordPress/WooCommerce.
 
@@ -31,7 +33,7 @@ Caso já tenha uma conta Empresa, você pode solicitar utilização do PayPal Pl
 
 ### Compatibilidade ###
 
-Compatível à partir da versão 3.0.x até a 3.1.1 do WooCommerce.
+Compatível à partir da versão 3.0.x até a 3.4.x do WooCommerce.
 
 ### Pré-requisitos ###
 
@@ -65,13 +67,10 @@ Caso tenha alguma dúvida ou dificuldade na utilização do plugin acesse a seç
 ## Screenshots ##
 
 ### 1. Exemplo de dados não preenchidos no tema Storefront. ###
-![Exemplo de dados não preenchidos no tema Storefront.](http://ps.w.org/paypal-plus-brasil/assets/screenshot-1.png)
+![Exemplo de dados não preenchidos no tema Storefront.](http://ps.w.org/paypal-plus-brasil/assets/screenshot-1.jpg)
 
 ### 2. Exemplo de checkout com cartão de crédito salvo no tema Storefront. ###
-![Exemplo de checkout com cartão de crédito salvo no tema Storefront.](http://ps.w.org/paypal-plus-brasil/assets/screenshot-2.png)
-
-### 3. Exemplo de primeira compra com cartão de crédito no tema Storefront. ###
-![Exemplo de primeira compra com cartão de crédito no tema Storefront.](http://ps.w.org/paypal-plus-brasil/assets/screenshot-3.png)
+![Exemplo de checkout com cartão de crédito salvo no tema Storefront.](http://ps.w.org/paypal-plus-brasil/assets/screenshot-2.jpg)
 
 
 ## Changelog ##
