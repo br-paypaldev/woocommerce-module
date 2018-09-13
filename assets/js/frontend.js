@@ -7,6 +7,11 @@ var WC_PPP_Brasil_Checkout = (function () {
          */
         this.onSubmitForm = function (event) {
             var checked = jQuery('#payment_method_' + wc_ppp_brasil_data.id + ':checked');
+            _this.log('info', 'Checking if PayPal Payment method is checked...');
+            _this.log('data', !!checked.length);
+            if (!jQuery("#payment_method_" + wc_ppp_brasil_data.id).length) {
+                _this.log('error', "PayPal Plus check button wasn't detected. Should have an element #payment_method_" + wc_ppp_brasil_data.id);
+            }
             // Block the form in order pay, as it isn't default.
             if (wc_ppp_brasil_data['order_pay']) {
                 _this.$form.block({
@@ -18,10 +23,23 @@ var WC_PPP_Brasil_Checkout = (function () {
                 });
             }
             // Check if is not forced submit and prevent submit before submit PayPal iframe or isn't the payment selected.
+            if (_this.forceSubmit && checked.length) {
+                _this.log('info', 'Form will be forced to submit.');
+            }
+            else if (checked.length) {
+                _this.log('info', "Form won't be forced to submit, will try to contact PayPal iframe first.");
+            }
+            // Submit the iframe
             if (!_this.forceSubmit && checked.length) {
                 event.preventDefault();
                 event.stopImmediatePropagation();
-                _this.instance.doContinue();
+                // Check if we have any instance
+                if (_this.instance) {
+                    _this.instance.doContinue();
+                }
+                else {
+                    _this.log('error', "We don't have the iframe instance, something wrong may have occurred. May be the fields isn't fulfilled.");
+                }
             }
         };
         /**
@@ -40,6 +58,7 @@ var WC_PPP_Brasil_Checkout = (function () {
          * @type {()=>any}
          */
         this.triggerUpdateCheckout = this.debounce(function () {
+            _this.log('info', 'Updating checkout...');
             _this.$body.trigger('update_checkout');
         }, 500);
         /**
@@ -50,16 +69,38 @@ var WC_PPP_Brasil_Checkout = (function () {
             _this.$inputResponse = jQuery('#wc-ppp-brasil-response');
             _this.$inputError = jQuery('#wc-ppp-brasil-error');
             _this.$inputSubmit = jQuery('#place_order');
+            if (!_this.$inputSubmit.length) {
+                _this.log('error', "Input submit wasn't found. Should have the #place_order element in the form.");
+            }
             _this.$overlay = jQuery('#wc-ppb-brasil-container-overlay');
             _this.$loading = jQuery('#wc-ppp-brasil-container-loading');
             _this.$containerDummy = jQuery('#wc-ppp-brasil-container-dummy');
             _this.$overlay.on('click', '[data-action=update-checkout]', _this.updateCheckout);
             _this.showOverlay();
+            var inputData = _this.$inputData.val();
+            var phpErrorData = jQuery('#wc-ppp-brasil-api-error-data').val();
+            if (phpErrorData) {
+                _this.log('error', 'There was an error with following data:');
+                _this.log('data', JSON.parse(phpErrorData));
+            }
             try {
-                var data = JSON.parse(_this.$inputData.val());
-                _this.createIframe(data);
+                if (inputData) {
+                    var data = JSON.parse(inputData);
+                    _this.log('info', 'Creating iframe with data:');
+                    _this.log('data', data);
+                    if (data.invalid.length !== 0) {
+                        _this.log('error', "There's some invalid data. Iframe will render dummy version:");
+                        _this.log('data', data.invalid);
+                    }
+                    _this.createIframe(data);
+                }
             }
             catch (error) {
+                _this.log('error', 'There was some error creating the iframe.');
+                _this.log('info', 'Data received:');
+                _this.log('data', inputData);
+                _this.log('info', 'Error:');
+                _this.log('data', error);
             }
         };
         /**
@@ -69,8 +110,11 @@ var WC_PPP_Brasil_Checkout = (function () {
         this.messageListener = function (event) {
             try {
                 var message = JSON.parse(event.data);
+                _this.log('info', 'Received a message:');
+                _this.log('data', message);
                 // Check if is iframe error handling or is just an action.
                 if (typeof message['cause'] !== 'undefined') {
+                    _this.log('error', 'This message is an iframe error!');
                     _this.treatIframeError(message);
                 }
                 else {
@@ -80,8 +124,34 @@ var WC_PPP_Brasil_Checkout = (function () {
             catch (err) {
             }
         };
+        this.log('heading', 'PayPal Plus logging enabled\n');
+        this.log('info', 'Backend data:');
+        this.log('data', wc_ppp_brasil_data);
+        // Set the body element.
         this.$body = jQuery(document.body);
+        // Log document.body detection.
+        if (this.$body.length) {
+            this.log('info', 'HTML body detected.');
+        }
+        else {
+            this.log('error', "HTML body didn't detected.");
+        }
+        // Set the form element
         this.$form = wc_ppp_brasil_data['order_pay'] ? jQuery('form#order_review') : jQuery('form.checkout.woocommerce-checkout');
+        // Log form element
+        if (wc_ppp_brasil_data['order_pay']) {
+            this.log('info', 'Running script as order pay.');
+        }
+        else {
+            this.log('info', 'Running script as order review.');
+        }
+        if (this.$form.length) {
+            this.log('info', 'Detected form.checkout.woocommerce-checkout element.');
+            this.log('data', this.$form);
+        }
+        else {
+            this.log('error', "Didn't detect form.checkout.woocommerce-checkout element.");
+        }
         // Listen for input/select changes.
         this.listenInputChanges();
         // Listen for updated checkout.
@@ -121,7 +191,11 @@ var WC_PPP_Brasil_Checkout = (function () {
             '[name=billing_persontype]',
         ];
         jQuery(keySelectors.join(',')).on('keyup', function () { return _this.updateCheckout(); });
+        this.log('info', 'Listening for keyup to following elements:');
+        this.log('data', keySelectors);
         jQuery(changeSelectors.join(',')).on('change', function () { return _this.updateCheckout(); });
+        this.log('info', 'Listening for change to following elements:');
+        this.log('data', changeSelectors);
     };
     /**
      * Create the iframe with the data.
@@ -138,7 +212,6 @@ var WC_PPP_Brasil_Checkout = (function () {
                 'approvalUrl': data.approval_url,
                 'placeholder': 'wc-ppp-brasil-container',
                 'mode': wc_ppp_brasil_data['mode'],
-                'iframeHeight': wc_ppp_brasil_data['form_height'],
                 'payerFirstName': data.first_name,
                 'payerLastName': data.last_name,
                 'payerPhone': data.phone,
@@ -147,6 +220,9 @@ var WC_PPP_Brasil_Checkout = (function () {
                 'payerEmail': data.email,
                 'rememberedCards': data.remembered_cards,
             };
+            if (wc_ppp_brasil_data['form_height']) {
+                settings['iframeHeight'] = wc_ppp_brasil_data['form_height'];
+            }
             // Fill conditional data
             if (wc_ppp_brasil_data.show_payer_tax_id) {
                 settings['payerTaxId'] = data.person_type === '1' ? data.cpf : data.cnpj;
@@ -155,6 +231,8 @@ var WC_PPP_Brasil_Checkout = (function () {
             else {
                 settings['payerTaxId'] = '';
             }
+            this.log('info', 'Settings for iframe:');
+            this.log('data', settings);
             // Instance the PPP.
             this.instance = PAYPAL.apps.PPP(settings);
         }
@@ -188,6 +266,7 @@ var WC_PPP_Brasil_Checkout = (function () {
                 this.showMessage('<div class="woocommerce-error">' + wc_ppp_brasil_data['messages']['check_entry'] + '</div>');
                 break;
             default:
+                this.log("This message won't be treated, so form will be submitted.");
                 this.$inputError.val(message['cause']);
                 this.forceSubmitForm();
                 break;
@@ -207,12 +286,14 @@ var WC_PPP_Brasil_Checkout = (function () {
             case 'disableContinueButton':
                 this.disableSubmitButton();
                 break;
-            // When the iframe was submited and we have the payment info.
+            // When the iframe was submitted and we have the payment info.
             case 'checkout':
+                var data = JSON.stringify(message);
+                this.log('info', 'Success message received from iframe:');
+                this.log('data', data);
                 // Add the data in the inputs
-                this.$inputResponse.val(JSON.stringify(message));
+                this.$inputResponse.val(data);
                 // Submit the form
-                this.forceSubmit = false;
                 this.forceSubmitForm();
                 break;
             // In case we get some error.
@@ -245,6 +326,9 @@ var WC_PPP_Brasil_Checkout = (function () {
     };
     WC_PPP_Brasil_Checkout.prototype.showMessage = function (messages) {
         var $form = jQuery('form.checkout');
+        if (!$form.length) {
+            this.log('error', "Isn't possible to find the form.checkout element.");
+        }
         // Remove notices from all sources
         jQuery('.woocommerce-error, .woocommerce-message').remove();
         // Add new errors
@@ -277,6 +361,40 @@ var WC_PPP_Brasil_Checkout = (function () {
         };
     };
     ;
+    WC_PPP_Brasil_Checkout.prototype.log = function (type) {
+        var data = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            data[_i - 1] = arguments[_i];
+        }
+        // Only log when debug_mode is enabled.
+        if (!wc_ppp_brasil_data.debug_mode) {
+            return;
+        }
+        // Log each type.
+        switch (type) {
+            case 'heading':
+                pwc().color("#003087").size(25).bold().log(data);
+                break;
+            case 'log':
+                pwc().log(data);
+                break;
+            case 'info':
+                pwc().bold().italic().color('#009cde').info(data);
+                break;
+            case 'warn':
+                pwc().warn(data);
+                break;
+            case 'error':
+                pwc().error(data);
+                break;
+            case 'data':
+                data.forEach(function (item) { return console.log(item); });
+                break;
+            case 'custom-message':
+                pwc().color('#012169').bold().italic().log(data);
+                break;
+        }
+    };
     return WC_PPP_Brasil_Checkout;
 })();
 new WC_PPP_Brasil_Checkout();

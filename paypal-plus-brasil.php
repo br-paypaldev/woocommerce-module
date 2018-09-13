@@ -3,7 +3,7 @@
 /**
  * Plugin Name: PayPal Plus Brasil
  * Description: Adicione o checkout transparente do PayPal ao seu checkout.
- * Version: 1.0.9
+ * Version: 1.2
  * Author: PayPal
  * Author URI: https://paypal.com.br
  * Requires at least: 4.4
@@ -26,6 +26,8 @@ if ( ! class_exists( 'WC_PPP_Brasil' ) ) {
 	 * Class WC_PPP_Brasil.
 	 */
 	class WC_PPP_Brasil {
+
+		public static $VERSION = '1.2';
 
 		/**
 		 * Current plugin instance.
@@ -77,7 +79,7 @@ if ( ! class_exists( 'WC_PPP_Brasil' ) ) {
 		 * Includes for the plugin.
 		 */
 		public function includes() {
-
+			include_once dirname( __FILE__ ) . '/includes/functions.php';
 		}
 
 		/**
@@ -120,7 +122,8 @@ if ( ! class_exists( 'WC_PPP_Brasil' ) ) {
 		 * WooCommerce Extra Checkout Fields for Brazil notice.
 		 */
 		public function ecfb_missing_notice() {
-			if ( ! class_exists( 'Extra_Checkout_Fields_For_Brazil' ) ) {
+			// Check if Extra Checkout Fields for Brazil is installed, but check if it's BRL.
+			if ( pppbr_needs_cpf() && ! class_exists( 'Extra_Checkout_Fields_For_Brazil' ) ) {
 				include dirname( __FILE__ ) . '/includes/views/html-notice-missing-ecfb.php';
 			}
 		}
