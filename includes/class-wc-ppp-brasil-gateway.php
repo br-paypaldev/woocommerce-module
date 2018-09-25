@@ -1326,7 +1326,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 		 * @return string
 		 */
 		public function get_title() {
-			$title = __( 'Cartão de Crédito', 'ppp-brasil' );
+			$title = get_woocommerce_currency() === "BRL" ? __( 'Cartão de Crédito', 'ppp-brasil' ) : __( 'Credit Card', 'ppp-brasil' );
 			if ( ! empty( $this->title ) ) {
 				$title .= ' ' . $this->title;
 			}
