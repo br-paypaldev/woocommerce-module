@@ -19,7 +19,6 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 	 * @property string wrong_credentials
 	 * @property string form_height
 	 * @property string invoice_id_prefix
-	 * @property string js_debug
 	 */
 	class WC_PPP_Brasil_Gateway extends WC_Payment_Gateway {
 
@@ -45,7 +44,6 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			$this->webhook_id        = $this->get_option( 'webhook_id' );
 			$this->mode              = $this->get_option( 'mode' );
 			$this->debug             = $this->get_option( 'debug' );
-			$this->js_debug          = $this->get_option( 'js_debug' );
 			$this->wrong_credentials = $this->get_option( 'wrong_credentials' );
 			$this->form_height       = $this->get_option( 'form_height' );
 			$this->invoice_id_prefix = $this->get_option( 'invoice_id_prefix', '' );
@@ -272,13 +270,6 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					'label'       => __( 'Habilitar', 'ppp-brasil' ),
 					'desc_tip'    => __( 'Habilite este modo para depurar a aplicação em caso de homologação ou erros.', 'ppp-brasil' ),
 					'description' => sprintf( __( 'Os logs serão salvos no caminho: %s.', 'woo-paypal-plus-brazil' ), $this->get_log_view() ),
-				),
-				'js_debug'          => array(
-					'title'       => __( 'Modo depuração JS', 'ppp-brasil' ),
-					'type'        => 'checkbox',
-					'label'       => __( 'Habilitar', 'ppp-brasil' ),
-					'desc_tip'    => __( 'Habilite este modo para depurar o Javascript da aplicação.', 'ppp-brasil' ),
-					'description' => __( 'Somente ative esta opção caso seja necessário avaliar os dados no checkout.', 'ppp-brasil' ),
 				),
 				'advanced_settings' => array(
 					'title'       => __( 'Configurações avançadas', 'ppp-brasil' ),
@@ -1032,7 +1023,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 		public function checkout_scripts() {
 			// Just load this script in checkout and if isn't in order-receive.
 			if ( is_checkout() && ! get_query_var( 'order-received' ) ) {
-				if ( 'yes' === $this->js_debug ) {
+				if ( 'yes' === $this->debug ) {
 					wp_enqueue_script( 'pretty-web-console', plugins_url( 'assets/js/pretty-web-console.lib.js', __DIR__ ), array(), '0.10.1', true );
 				}
 				wp_enqueue_script( 'ppp-script', '//www.paypalobjects.com/webstatic/ppplusdcc/ppplusdcc.min.js', array(), WC_PPP_Brasil::$VERSION, true );
@@ -1047,7 +1038,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					'messages'          => array(
 						'check_entry' => __( 'Verifique os dados informados e tente novamente', 'ppp-brasil' ),
 					),
-					'debug_mode'        => 'yes' === $this->js_debug,
+					'debug_mode'        => 'yes' === $this->debug,
 				) );
 				wp_enqueue_script( 'wc-ppp-brasil-script', plugins_url( 'assets/js/frontend.js', __DIR__ ), array( 'jquery' ), WC_PPP_Brasil::$VERSION, true );
 				wp_enqueue_style( 'wc-ppp-brasil-style', plugins_url( 'assets/css/frontend.css', __DIR__ ), array(), WC_PPP_Brasil::$VERSION, 'all' );
