@@ -269,7 +269,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					'type'        => 'checkbox',
 					'label'       => __( 'Habilitar', 'paypal-plus-brasil' ),
 					'desc_tip'    => __( 'Habilite este modo para depurar a aplicação em caso de homologação ou erros.', 'paypal-plus-brasil' ),
-					'description' => sprintf( __( 'Os logs serão salvos no caminho: %s.', 'woo-paypal-plus-brazil' ), $this->get_log_view() ),
+					'description' => sprintf( __( 'Os logs serão salvos no caminho: %s.', 'paypal-plus-brasil' ), $this->get_log_view() ),
 				),
 				'advanced_settings' => array(
 					'title'       => __( 'Configurações avançadas', 'paypal-plus-brasil' ),
@@ -1075,7 +1075,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 		public function admin_scripts() {
 			$screen         = get_current_screen();
 			$screen_id      = $screen ? $screen->id : '';
-			$wc_screen_id   = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
+			$wc_screen_id   = sanitize_title( __( 'WooCommerce', 'paypal-plus-brasil' ) );
 			$wc_settings_id = $wc_screen_id . '_page_wc-settings';
 			if ( $wc_settings_id === $screen_id && isset( $_GET['section'] ) && $_GET['section'] === $this->id ) {
 				wp_enqueue_style( 'wc-ppp-brasil-admin-style', plugins_url( 'assets/css/backend.css', __DIR__ ), array(), WC_PPP_Brasil::$VERSION, 'all' );

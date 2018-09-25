@@ -48,7 +48,7 @@ $sale_details_link = 'https://www.paypal.com/myaccount/transaction/print-details
 		<?php else: ?>
             <li>
                 <strong><?php _e( 'Detalhes:', 'paypal-plus-brasil' ); ?></strong> <a href="<?php echo $sale_details_link; ?>"
-                                                                              target="_blank"><?php _e( 'imprimir', 'woo-paypal-plus-brazil' ); ?></a>
+                                                                              target="_blank"><?php _e( 'imprimir', 'paypal-plus-brasil' ); ?></a>
             </li>
 		<?php endif; ?>
     </ul>

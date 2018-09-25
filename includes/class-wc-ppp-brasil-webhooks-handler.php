@@ -60,7 +60,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Webhooks_Handler' ) ) {
 				'cancelled'
 			), true )
 			) {
-				$order->add_order_note( __( 'PayPal Plus: Transação paga.', 'woo-paypal-plus-brasil' ) );
+				$order->add_order_note( __( 'PayPal Plus: Transação paga.', 'paypal-plus-brasil' ) );
 				$order->payment_complete();
 			}
 		}
