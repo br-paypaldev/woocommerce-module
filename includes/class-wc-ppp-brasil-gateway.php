@@ -287,7 +287,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					'title'       => __( 'Prefixo de Invoice ID', 'ppp-brasil' ),
 					'type'        => 'text',
 					'default'     => '',
-					'description' => __( 'Adicione um prefixo ao Invoice ID das compras feitas com PayPal Plus na sua loja. Isso pode auxiliar em problemas de Invoice duplicado caso trabalhe com a mesma conta PayPal em mais de um site.', 'ppp-brasil' ),
+					'description' => __( 'Adicione um prefixo as transações feitas com PayPal Plus na sua loja. Isso pode auxiliar caso trabalhe com a mesma conta PayPal em mais de um site.', 'ppp-brasil' ),
 				),
 			);
 		}
