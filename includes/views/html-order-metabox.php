@@ -28,26 +28,26 @@ $sale_details_link = 'https://www.paypal.com/myaccount/transaction/print-details
 ?>
 <?php if ( $payment_method === 'wc-ppp-brasil-gateway' && ( $order->get_status() === 'processing' || $order->get_status() === 'completed' ) ): ?>
     <ul>
-        <li><strong><?php _e( 'ID da venda:', 'ppp-brasil' ); ?></strong> <a href="<?php echo $sale_link; ?>"
+        <li><strong><?php _e( 'ID da venda:', 'paypal-plus-brasil' ); ?></strong> <a href="<?php echo $sale_link; ?>"
                                                                              target="_blank"><?php echo $sale_id; ?></a>
         </li>
         <li>
-            <strong><?php _e( 'Tarifa de venda:', 'ppp-brasil' ); ?></strong> <?php echo wc_price( $sale['transaction_fee']['value'] ); ?>
+            <strong><?php _e( 'Tarifa de venda:', 'paypal-plus-brasil' ); ?></strong> <?php echo wc_price( $sale['transaction_fee']['value'] ); ?>
         </li>
 		<?php if ( $currency === 'USD' ): ?>
             <li>
-                <strong><?php _e( 'Valor:', 'ppp-brasil' ); ?></strong> <?php echo wc_price( $order->get_total() ); ?>
+                <strong><?php _e( 'Valor:', 'paypal-plus-brasil' ); ?></strong> <?php echo wc_price( $order->get_total() ); ?>
             </li>
 		<?php else: ?>
             <li>
-                <strong><?php _e( 'Parcelamento:', 'ppp-brasil' ); ?></strong> <?php echo sprintf( '%dx %s', $installments, wc_price( $order->get_total() / $installments ) ); ?>
+                <strong><?php _e( 'Parcelamento:', 'paypal-plus-brasil' ); ?></strong> <?php echo sprintf( '%dx %s', $installments, wc_price( $order->get_total() / $installments ) ); ?>
             </li>
 		<?php endif; ?>
 		<?php if ( 'yes' == $sandbox ): ?>
-            <li><strong><?php _e( 'Sandbox:', 'ppp-brasil' ); ?></strong> <?php _e( 'sim', 'ppp-brasil' ); ?></li>
+            <li><strong><?php _e( 'Sandbox:', 'paypal-plus-brasil' ); ?></strong> <?php _e( 'sim', 'paypal-plus-brasil' ); ?></li>
 		<?php else: ?>
             <li>
-                <strong><?php _e( 'Detalhes:', 'ppp-brasil' ); ?></strong> <a href="<?php echo $sale_details_link; ?>"
+                <strong><?php _e( 'Detalhes:', 'paypal-plus-brasil' ); ?></strong> <a href="<?php echo $sale_details_link; ?>"
                                                                               target="_blank"><?php _e( 'imprimir', 'woo-paypal-plus-brazil' ); ?></a>
             </li>
 		<?php endif; ?>

@@ -37,7 +37,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Metabox' ) ) {
 			global $post;
 			add_meta_box(
 				'wc-ppp-brasil',
-				__( 'PayPal Plus', 'ppp-brasil' ),
+				__( 'PayPal Plus', 'paypal-plus-brasil' ),
 				array( $this, 'render_metabox' ),
 				'shop_order',
 				'side',

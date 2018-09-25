@@ -8,7 +8,7 @@
  * Author URI: https://paypal.com.br
  * Requires at least: 4.4
  * Tested up to: 4.9
- * Text Domain: ppp-brasil
+ * Text Domain: paypal-plus-brasil
  * Domain Path: /languages/
  * WC requires at least: 3.0
  * WC tested up to: 3.4
@@ -115,7 +115,7 @@ if ( ! class_exists( 'WC_PPP_Brasil' ) ) {
 		 * Load the plugin text domain for translation.
 		 */
 		public function load_plugin_textdomain() {
-			load_plugin_textdomain( 'ppp-brasil', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+			load_plugin_textdomain( 'paypal-plus-brasil', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 		}
 
 		/**
@@ -155,7 +155,7 @@ if ( ! class_exists( 'WC_PPP_Brasil' ) ) {
 		public function plugin_action_links( $links ) {
 			$plugin_links = array();
 			if ( ! self::woocommerce_incompatible() ) {
-				$plugin_links[] = '<a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=wc-ppp-brasil-gateway' ) ) . '">' . __( 'Configurações', 'ppp-brasil' ) . '</a>';
+				$plugin_links[] = '<a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=wc-ppp-brasil-gateway' ) ) . '">' . __( 'Configurações', 'paypal-plus-brasil' ) . '</a>';
 			}
 
 			return array_merge( $plugin_links, $links );
