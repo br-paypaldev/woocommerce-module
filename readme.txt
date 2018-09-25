@@ -3,7 +3,7 @@ Contributors: apuhlmann
 Tags: paypal, paypal plus, woocommerce, woo commerce, checkout transparente, transparente, pagamento, gateway, paypal brasil, ecommerce, e-commerce
 Requires at least: 4.4
 Tested up to: 4.9
-Stable tag: 1.2
+Stable tag: 1.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 WC requires at least: 3.0
@@ -73,6 +73,8 @@ Caso tenha alguma dúvida ou dificuldade na utilização do plugin acesse a seç
 
 = 1.0.0 - 2017/07/25 =
 
+= 1.3 - 2018/09/25 =
+
 * Versão inicial do plugin.
 
 == Upgrade Notice ==
@@ -80,3 +82,10 @@ Caso tenha alguma dúvida ou dificuldade na utilização do plugin acesse a seç
 = 1.0.0 =
 
 * Versão inicial do plugin.
+
+= 1.3 =
+
+* Configurações agora possuem somente um checkbox para debug.
+* Modificado a descrição do campo de "Prefixo de Invoice ID".
+* Título do gateway baseado na moeda configurada no WooCommerce.
+* Modificado os detalhes do pagamento na página administrativa do pedido.
