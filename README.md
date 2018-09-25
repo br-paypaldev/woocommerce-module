@@ -93,3 +93,4 @@ Caso tenha alguma dúvida ou dificuldade na utilização do plugin acesse a seç
 * Modificado a descrição do campo de "Prefixo de Invoice ID".
 * Título do gateway baseado na moeda configurada no WooCommerce.
 * Modificado os detalhes do pagamento na página administrativa do pedido.
+* Alterado o plugin locale para paypal-plus-brasil
