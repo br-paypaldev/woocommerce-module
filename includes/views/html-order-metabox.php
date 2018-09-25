@@ -21,6 +21,7 @@ $sandbox           = 'yes';
 $installments      = get_post_meta( $order->get_id(), 'wc_ppp_brasil_installments', true );
 $sale_id           = get_post_meta( $order->get_id(), 'wc_ppp_brasil_sale_id', true );
 $sale              = get_post_meta( $order->get_id(), 'wc_ppp_brasil_sale', true );
+$currency          = $order->get_currency();
 $sale_link_prefix  = 'yes' == $sandbox ? 'https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_history-details-from-hub&id=' : 'https://history.paypal.com/cgi-bin/webscr?cmd=_history-details-from-hub&id=';
 $sale_link         = $sale_link_prefix . $sale_id;
 $sale_details_link = 'https://www.paypal.com/myaccount/transaction/print-details/' . $sale_id;
@@ -33,9 +34,15 @@ $sale_details_link = 'https://www.paypal.com/myaccount/transaction/print-details
         <li>
             <strong><?php _e( 'Tarifa de venda:', 'ppp-brasil' ); ?></strong> <?php echo wc_price( $sale['transaction_fee']['value'] ); ?>
         </li>
-        <li>
-            <strong><?php _e( 'Parcelamento:', 'ppp-brasil' ); ?></strong> <?php echo sprintf( '%dx %s', $installments, wc_price( $order->get_total() / $installments ) ); ?>
-        </li>
+		<?php if ( $currency === 'USD' ): ?>
+            <li>
+                <strong><?php _e( 'Valor:', 'ppp-brasil' ); ?></strong> <?php echo wc_price( $order->get_total() ); ?>
+            </li>
+		<?php else: ?>
+            <li>
+                <strong><?php _e( 'Parcelamento:', 'ppp-brasil' ); ?></strong> <?php echo sprintf( '%dx %s', $installments, wc_price( $order->get_total() / $installments ) ); ?>
+            </li>
+		<?php endif; ?>
 		<?php if ( 'yes' == $sandbox ): ?>
             <li><strong><?php _e( 'Sandbox:', 'ppp-brasil' ); ?></strong> <?php _e( 'sim', 'ppp-brasil' ); ?></li>
 		<?php else: ?>
