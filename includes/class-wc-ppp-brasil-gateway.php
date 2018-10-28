@@ -593,6 +593,9 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			$execution = new \PayPal\Api\PaymentExecution();
 			$execution->setPayerId( $payer_id );
 
+			// Log request
+			$this->log( "Execute payment request: " . $this->print_r( $execution->toArray(), true ) );
+
 			return $payment->execute( $execution, $api_context );
 		}
 
