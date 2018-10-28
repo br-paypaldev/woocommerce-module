@@ -60,7 +60,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Webhooks_Handler' ) ) {
 				'cancelled'
 			), true )
 			) {
-				$order->add_order_note( __( 'PayPal Plus: Transação paga.', 'woo-paypal-plus-brasil' ) );
+				$order->add_order_note( __( 'PayPal Plus: Transação paga.', 'paypal-plus-brasil' ) );
 				$order->payment_complete();
 			}
 		}
@@ -77,7 +77,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Webhooks_Handler' ) ) {
 			}
 			// Check if the current status isn't failed.
 			if ( ! in_array( $order->get_status(), array( 'failed', 'completed', 'processing' ), true ) ) {
-				$order->update_status( 'failed', __( 'PayPal Plus: A transação foi rejeitada pela empresa de cartão ou por fraude.', 'ppp-brasil' ) );
+				$order->update_status( 'failed', __( 'PayPal Plus: A transação foi rejeitada pela empresa de cartão ou por fraude.', 'paypal-plus-brasil' ) );
 			}
 		}
 
@@ -97,7 +97,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Webhooks_Handler' ) ) {
 			}
 			// Check if the current status isn't refunded.
 			if ( ! in_array( $order->get_status(), array( 'refunded' ), true ) ) {
-				$order->update_status( 'refunded', __( 'PayPal Plus: A transação foi reembolsada.', 'ppp-brasil' ) );
+				$order->update_status( 'refunded', __( 'PayPal Plus: A transação foi reembolsada.', 'paypal-plus-brasil' ) );
 			}
 		}
 
@@ -111,7 +111,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Webhooks_Handler' ) ) {
 			if ( ! $order ) {
 				return;
 			}
-			$order->update_status( 'refunded', __( 'PayPal Plus: A transação foi revertida.', 'ppp-brasil' ) );
+			$order->update_status( 'refunded', __( 'PayPal Plus: A transação foi revertida.', 'paypal-plus-brasil' ) );
 		}
 
 	}

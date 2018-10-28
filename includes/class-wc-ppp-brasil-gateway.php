@@ -19,7 +19,6 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 	 * @property string wrong_credentials
 	 * @property string form_height
 	 * @property string invoice_id_prefix
-	 * @property string js_debug
 	 */
 	class WC_PPP_Brasil_Gateway extends WC_Payment_Gateway {
 
@@ -30,8 +29,8 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			// Set default settings.
 			$this->id                 = 'wc-ppp-brasil-gateway';
 			$this->has_fields         = true;
-			$this->method_title       = __( 'PayPal Plus Brasil', 'ppp-brasil' );
-			$this->method_description = __( 'Solução PayPal para pagamentos transparentes aonde utiliza-se apenas o Cartão de Crédito.', 'ppp-brasil' );
+			$this->method_title       = __( 'PayPal Plus Brasil', 'paypal-plus-brasil' );
+			$this->method_description = __( 'Solução PayPal para pagamentos transparentes aonde utiliza-se apenas o Cartão de Crédito.', 'paypal-plus-brasil' );
 			$this->supports           = array( 'products', 'refunds' );
 
 			// Load settings fields.
@@ -45,7 +44,6 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			$this->webhook_id        = $this->get_option( 'webhook_id' );
 			$this->mode              = $this->get_option( 'mode' );
 			$this->debug             = $this->get_option( 'debug' );
-			$this->js_debug          = $this->get_option( 'js_debug' );
 			$this->wrong_credentials = $this->get_option( 'wrong_credentials' );
 			$this->form_height       = $this->get_option( 'form_height' );
 			$this->invoice_id_prefix = $this->get_option( 'invoice_id_prefix', '' );
@@ -231,72 +229,65 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 		public function init_form_fields() {
 			$this->form_fields = array(
 				'enabled'           => array(
-					'title'   => __( 'Habilitar/Desabilitar', 'ppp-brasil' ),
+					'title'   => __( 'Habilitar/Desabilitar', 'paypal-plus-brasil' ),
 					'type'    => 'checkbox',
-					'label'   => __( 'Habilitar', 'ppp-brasil' ),
+					'label'   => __( 'Habilitar', 'paypal-plus-brasil' ),
 					'default' => 'yes',
 				),
 				'title'             => array(
-					'title'       => __( 'Nome de exibição', 'ppp-brasil' ),
+					'title'       => __( 'Nome de exibição', 'paypal-plus-brasil' ),
 					'type'        => 'text',
 					'default'     => '',
-					'placeholder' => __( 'Exemplo: (Parcelado em até 12x)', 'ppp-brasil' ),
-					'description' => __( 'Será exibido no checkout: Cartão de Crédito (Parcelado em até 12x)', 'ppp-brasil' ),
-					'desc_tip'    => __( 'Por padrão a solução do PayPal Plus é exibida como “Cartão de Crédito”, utilize esta opção para definir um texto adicional como parcelamento ou descontos.', 'ppp-brasil' ),
+					'placeholder' => __( 'Exemplo: (Parcelado em até 12x)', 'paypal-plus-brasil' ),
+					'description' => __( 'Será exibido no checkout: Cartão de Crédito (Parcelado em até 12x)', 'paypal-plus-brasil' ),
+					'desc_tip'    => __( 'Por padrão a solução do PayPal Plus é exibida como “Cartão de Crédito”, utilize esta opção para definir um texto adicional como parcelamento ou descontos.', 'paypal-plus-brasil' ),
 				),
 				'mode'              => array(
-					'title'       => __( 'Modo', 'ppp-brasil' ),
+					'title'       => __( 'Modo', 'paypal-plus-brasil' ),
 					'type'        => 'select',
 					'options'     => array(
-						'live'    => __( 'Produção', 'ppp-brasil' ),
-						'sandbox' => __( 'Sandbox', 'ppp-brasil' ),
+						'live'    => __( 'Produção', 'paypal-plus-brasil' ),
+						'sandbox' => __( 'Sandbox', 'paypal-plus-brasil' ),
 					),
-					'description' => __( 'Utilize esta opção para alternar entre os modos Sandbox e Produção. Sandbox é utilizado para testes e Produção para compras reais.', 'ppp-brasil' ),
+					'description' => __( 'Utilize esta opção para alternar entre os modos Sandbox e Produção. Sandbox é utilizado para testes e Produção para compras reais.', 'paypal-plus-brasil' ),
 				),
 				'client_id'         => array(
-					'title'       => __( 'Client ID', 'ppp-brasil' ),
+					'title'       => __( 'Client ID', 'paypal-plus-brasil' ),
 					'type'        => 'text',
 					'default'     => '',
-					'description' => sprintf( __( 'Para gerar o Client ID acesse <a href="%s" target="_blank">aqui</a> e procure pela seção “REST API apps”.', 'ppp-brasil' ), 'https://developer.paypal.com/docs/classic/lifecycle/sb_credentials/' ),
+					'description' => sprintf( __( 'Para gerar o Client ID acesse <a href="%s" target="_blank">aqui</a> e procure pela seção “REST API apps”.', 'paypal-plus-brasil' ), 'https://developer.paypal.com/docs/classic/lifecycle/sb_credentials/' ),
 
 				),
 				'client_secret'     => array(
-					'title'       => __( 'Secret ID', 'ppp-brasil' ),
+					'title'       => __( 'Secret ID', 'paypal-plus-brasil' ),
 					'type'        => 'text',
 					'default'     => '',
-					'description' => sprintf( __( 'Para gerar o Secret ID acesse <a href="%s" target="_blank">aqui</a> e procure pela seção “REST API apps”.', 'ppp-brasil' ), 'https://developer.paypal.com/docs/classic/lifecycle/sb_credentials/' ),
+					'description' => sprintf( __( 'Para gerar o Secret ID acesse <a href="%s" target="_blank">aqui</a> e procure pela seção “REST API apps”.', 'paypal-plus-brasil' ), 'https://developer.paypal.com/docs/classic/lifecycle/sb_credentials/' ),
 				),
 				'debug'             => array(
-					'title'       => __( 'Modo depuração', 'ppp-brasil' ),
+					'title'       => __( 'Modo depuração', 'paypal-plus-brasil' ),
 					'type'        => 'checkbox',
-					'label'       => __( 'Habilitar', 'ppp-brasil' ),
-					'desc_tip'    => __( 'Habilite este modo para depurar a aplicação em caso de homologação ou erros.', 'ppp-brasil' ),
-					'description' => sprintf( __( 'Os logs serão salvos no caminho: %s.', 'woo-paypal-plus-brazil' ), $this->get_log_view() ),
-				),
-				'js_debug'          => array(
-					'title'       => __( 'Modo depuração JS', 'ppp-brasil' ),
-					'type'        => 'checkbox',
-					'label'       => __( 'Habilitar', 'ppp-brasil' ),
-					'desc_tip'    => __( 'Habilite este modo para depurar o Javascript da aplicação.', 'ppp-brasil' ),
-					'description' => __( 'Somente ative esta opção caso seja necessário avaliar os dados no checkout.', 'ppp-brasil' ),
+					'label'       => __( 'Habilitar', 'paypal-plus-brasil' ),
+					'desc_tip'    => __( 'Habilite este modo para depurar a aplicação em caso de homologação ou erros.', 'paypal-plus-brasil' ),
+					'description' => sprintf( __( 'Os logs serão salvos no caminho: %s.', 'paypal-plus-brasil' ), $this->get_log_view() ),
 				),
 				'advanced_settings' => array(
-					'title'       => __( 'Configurações avançadas', 'ppp-brasil' ),
+					'title'       => __( 'Configurações avançadas', 'paypal-plus-brasil' ),
 					'type'        => 'title',
-					'description' => __( 'Utilize estas opções para customizar a experiência da solução.', 'ppp-brasil' ),
+					'description' => __( 'Utilize estas opções para customizar a experiência da solução.', 'paypal-plus-brasil' ),
 				),
 				'form_height'       => array(
-					'title'       => __( 'Altura do formulário', 'ppp-brasil' ),
+					'title'       => __( 'Altura do formulário', 'paypal-plus-brasil' ),
 					'type'        => 'text',
 					'default'     => '',
-					'placeholder' => __( 'px', 'ppp-brasil' ),
-					'description' => __( 'Utilize esta opção para definir uma altura máxima do formulário de cartão de crédito (será considerado um valor em pixels). Será aceito um valor em pixels entre 400 - 550.', 'ppp-brasil' ),
+					'placeholder' => __( 'px', 'paypal-plus-brasil' ),
+					'description' => __( 'Utilize esta opção para definir uma altura máxima do formulário de cartão de crédito (será considerado um valor em pixels). Será aceito um valor em pixels entre 400 - 550.', 'paypal-plus-brasil' ),
 				),
 				'invoice_id_prefix' => array(
-					'title'       => __( 'Prefixo de Invoice ID', 'ppp-brasil' ),
+					'title'       => __( 'Prefixo de Invoice ID', 'paypal-plus-brasil' ),
 					'type'        => 'text',
 					'default'     => '',
-					'description' => __( 'Adicione um prefixo ao Invoice ID das compras feitas com PayPal Plus na sua loja. Isso pode auxiliar em problemas de Invoice duplicado caso trabalhe com a mesma conta PayPal em mais de um site.', 'ppp-brasil' ),
+					'description' => __( 'Adicione um prefixo as transações feitas com PayPal Plus na sua loja. Isso pode auxiliar caso trabalhe com a mesma conta PayPal em mais de um site.', 'paypal-plus-brasil' ),
 				),
 			);
 		}
@@ -307,7 +298,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 		 * @return string
 		 */
 		protected function get_log_view() {
-			return '<a target="_blank" href="' . esc_url( admin_url( 'admin.php?page=wc-status&tab=logs&log_file=' . esc_attr( $this->id ) . '-' . sanitize_file_name( wp_hash( $this->id ) ) . '.log' ) ) . '">' . __( 'Status do Sistema &gt; Logs', 'ppp-brasil' ) . '</a>';
+			return '<a target="_blank" href="' . esc_url( admin_url( 'admin.php?page=wc-status&tab=logs&log_file=' . esc_attr( $this->id ) . '-' . sanitize_file_name( wp_hash( $this->id ) ) . '.log' ) ) . '">' . __( 'Status do Sistema &gt; Logs', 'paypal-plus-brasil' ) . '</a>';
 		}
 
 		/**
@@ -328,7 +319,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			if ( isset( $_POST['wc-ppp-brasil-error'] ) && ! empty( $_POST['wc-ppp-brasil-error'] ) ) {
 				switch ( $_POST['wc-ppp-brasil-error'] ) {
 					case 'CARD_ATTEMPT_INVALID':
-						wc_add_notice( __( 'Número de tentativas excedidas, por favor tente novamente. Se o erro persistir entre em contato.', 'ppp-brasil' ), 'error' );
+						wc_add_notice( __( 'Número de tentativas excedidas, por favor tente novamente. Se o erro persistir entre em contato.', 'paypal-plus-brasil' ), 'error' );
 						break;
 					case 'INTERNAL_SERVICE_ERROR':
 					case 'SOCKET_HANG_UP':
@@ -338,16 +329,16 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					case 'UNKNOWN_INTERNAL_ERROR':
 					case 'fiWalletLifecycle_unknown_error':
 					case 'Failed to decrypt term info':
-						wc_add_notice( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato.', 'ppp-brasil' ), 'error' );
+						wc_add_notice( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato.', 'paypal-plus-brasil' ), 'error' );
 						break;
 					case 'RISK_N_DECLINE':
 					case 'NO_VALID_FUNDING_SOURCE_OR_RISK_REFUSED':
 					case 'TRY_ANOTHER_CARD':
 					case 'NO_VALID_FUNDING_INSTRUMENT':
-						wc_add_notice( __( 'Não foi possível processar o seu pagamento, tente novamente ou entre em contato contato com o PayPal (0800-047-4482).', 'ppp-brasil' ), 'error' );
+						wc_add_notice( __( 'Não foi possível processar o seu pagamento, tente novamente ou entre em contato contato com o PayPal (0800-047-4482).', 'paypal-plus-brasil' ), 'error' );
 						break;
 					default:
-						wc_add_notice( __( 'Por favor revise as informações inseridas do cartão de crédito.', 'ppp-brasil' ), 'error' );
+						wc_add_notice( __( 'Por favor revise as informações inseridas do cartão de crédito.', 'paypal-plus-brasil' ), 'error' );
 						break;
 				}
 
@@ -362,7 +353,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 			// Prevent submit any dummy data.
 			if ( WC()->session->get( 'wc-ppp-brasil-dummy-data' ) === true ) {
-				wc_add_notice( __( 'You are not allowed to do that.', 'ppp-brasil' ), 'error' );
+				wc_add_notice( __( 'You are not allowed to do that.', 'paypal-plus-brasil' ), 'error' );
 				$this->log( 'Payment failed because was trying to pay with dummy data.' );
 
 				return null;
@@ -370,7 +361,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 			// Check the payment id
 			if ( ! $payment_id ) {
-				wc_add_notice( __( 'Invalid payment ID.', 'ppp-brasil' ), 'error' );
+				wc_add_notice( __( 'Invalid payment ID.', 'paypal-plus-brasil' ), 'error' );
 				$this->log( 'Payment failed because was trying to pay with invalid payment ID' );
 
 				return null;
@@ -386,7 +377,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 				// Check if the payment id
 				if ( empty( $payer_id ) ) {
-					wc_add_notice( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato.', 'ppp-brasil' ), 'error' );
+					wc_add_notice( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato.', 'paypal-plus-brasil' ), 'error' );
 					$this->log( 'Empty payer ID' );
 
 					return null;
@@ -394,7 +385,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 				// Check if the payment id equal to stored
 				if ( $payment_id !== $iframe_data['payment_id'] ) {
-					wc_add_notice( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato.', 'ppp-brasil' ), 'error' );
+					wc_add_notice( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato.', 'paypal-plus-brasil' ), 'error' );
 					$this->log( 'Payment failed because was trying to change the iframe response data with a new payment ID' );
 
 					return null;
@@ -422,7 +413,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 						break;
 					case 'pending':
 						wc_reduce_stock_levels( $order_id );
-						$order->update_status( 'on-hold', __( 'O pagamento está em revisão pelo PayPal.', 'ppp-brasil' ) );
+						$order->update_status( 'on-hold', __( 'O pagamento está em revisão pelo PayPal.', 'paypal-plus-brasil' ) );
 						$result_success = true;
 						break;
 				}
@@ -448,20 +439,20 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					case 'INTERNAL_SERVICE_ERROR':
 						if ( $force ) {
 							$this->log( 'Error #' . $uid_error );
-							wc_add_notice( sprintf( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato. Código: %s.', 'ppp-brasil' ), $uid_error ), 'error' );
+							wc_add_notice( sprintf( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato. Código: %s.', 'paypal-plus-brasil' ), $uid_error ), 'error' );
 						} else {
 							$this->process_payment( $order_id, true );
 						}
 						break;
 					case 'VALIDATION_ERROR':
-						wc_add_notice( sprintf( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato. Código: %s.', 'ppp-brasil' ), $uid_error ), 'error' );
+						wc_add_notice( sprintf( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato. Código: %s.', 'paypal-plus-brasil' ), $uid_error ), 'error' );
 						$this->log( 'Error #' . $uid_error );
 						break;
 					case 'PAYMENT_ALREADY_DONE':
-						wc_add_notice( __( 'Já existe um pagamento para este pedido.', 'ppp-brasil' ), 'error' );
+						wc_add_notice( __( 'Já existe um pagamento para este pedido.', 'paypal-plus-brasil' ), 'error' );
 						break;
 					default:
-						wc_add_notice( __( 'O seu pagamento não foi aprovado, por favor tente novamente.', 'ppp-brasil' ), 'error' );
+						wc_add_notice( __( 'O seu pagamento não foi aprovado, por favor tente novamente.', 'paypal-plus-brasil' ), 'error' );
 						break;
 				}
 
@@ -471,7 +462,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				return null;
 			} catch ( Exception $ex ) {
 				$uid_error = $this->unique_id();
-				wc_add_notice( sprintf( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato. Código: %s.', 'ppp-brasil' ), $uid_error ), 'error' );
+				wc_add_notice( sprintf( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato. Código: %s.', 'paypal-plus-brasil' ), $uid_error ), 'error' );
 				$this->log( 'Error #' . $uid_error );
 				$this->log( 'PHP Error: ' . $this->print_r( $ex->getMessage(), true ) );
 
@@ -497,7 +488,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 			// Check if the amount is bigger than zero
 			if ( $amount <= 0 ) {
-				return new WP_Error( 'error', sprintf( __( 'O reembolso não pode ser menor que %s.', 'ppp-brasil' ), wc_price( 0 ) ) );
+				return new WP_Error( 'error', sprintf( __( 'O reembolso não pode ser menor que %s.', 'paypal-plus-brasil' ), wc_price( 0 ) ) );
 			}
 
 			// Get the API context
@@ -556,7 +547,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$this->log( 'Error #' . $uid_error );
 				$this->log( 'Trying to refund a PayPal payment without the sale ID' );
 
-				return new WP_Error( 'error', sprintf( __( 'Parece que você não tem um pedido para realizar o reembolso. Código: #%s', 'ppp-brasil' ), $uid_error ) );
+				return new WP_Error( 'error', sprintf( __( 'Parece que você não tem um pedido para realizar o reembolso. Código: #%s', 'paypal-plus-brasil' ), $uid_error ) );
 			}
 
 		}
@@ -589,7 +580,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			$patchAddDescription = new \PayPal\Api\Patch();
 			$patchAddDescription->setOp( 'add' )
 			                    ->setPath( '/transactions/0/description' )
-			                    ->setValue( sprintf( __( 'Pedido #%s realizado na loja %s', 'ppp-brasil' ), $order->get_id(), get_bloginfo( 'name' ) ) );
+			                    ->setValue( sprintf( __( 'Pedido #%s realizado na loja %s', 'paypal-plus-brasil' ), $order->get_id(), get_bloginfo( 'name' ) ) );
 
 			// Create patch request.
 			$patchRequest = new \PayPal\Api\PatchRequest();
@@ -818,7 +809,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					$items[]  = $item;
 					$discount = $order ? $order->get_total_discount() : $cart->discount_cart;
 					$item->setSku( 'discount' )
-					     ->setName( __( 'Desconto', 'ppp-brasil' ) )
+					     ->setName( __( 'Desconto', 'paypal-plus-brasil' ) )
 					     ->setQuantity( 1 )
 					     ->setPrice( $discount * - 1 )
 					     ->setCurrency( get_woocommerce_currency() );
@@ -942,7 +933,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$this->log( 'PHP Error: ' . $this->print_r( $ex->getMessage(), true ) );
 			}
 
-			$exception       = new Exception( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato.', 'ppp-brasil' ) );
+			$exception       = new Exception( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato.', 'paypal-plus-brasil' ) );
 			$exception->data = $exception_data;
 
 			throw $exception;
@@ -960,42 +951,42 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 			// Check first name.
 			if ( empty( $data['first_name'] ) ) {
-				$errors['first_name'] = __( 'Nome inválido', 'ppp-brasil' );
+				$errors['first_name'] = __( 'Nome inválido', 'paypal-plus-brasil' );
 			}
 
 			// Check last name.
 			if ( empty( $data['last_name'] ) ) {
-				$errors['last_name'] = __( 'Sobrenome inválido', 'ppp-brasil' );
+				$errors['last_name'] = __( 'Sobrenome inválido', 'paypal-plus-brasil' );
 			}
 
 			// Check phone.
 			if ( empty( $data['phone'] ) ) {
-				$errors['phone'] = __( 'Telefone inválido', 'ppp-brasil' );
+				$errors['phone'] = __( 'Telefone inválido', 'paypal-plus-brasil' );
 			}
 
 			if ( empty( $data['address'] ) ) {
-				$errors['address'] = __( 'Endereço inválido', 'ppp-brasil' );
+				$errors['address'] = __( 'Endereço inválido', 'paypal-plus-brasil' );
 			}
 
 			if ( empty( $data['city'] ) ) {
-				$errors['city'] = __( 'Cidade inválida', 'ppp-brasil' );
+				$errors['city'] = __( 'Cidade inválida', 'paypal-plus-brasil' );
 			}
 
 			if ( empty( $data['state'] ) ) {
-				$errors['state'] = __( 'Estado inválido', 'ppp-brasil' );
+				$errors['state'] = __( 'Estado inválido', 'paypal-plus-brasil' );
 			}
 
 			if ( empty( $data['country'] ) ) {
-				$errors['country'] = __( 'País inválido', 'ppp-brasil' );
+				$errors['country'] = __( 'País inválido', 'paypal-plus-brasil' );
 			}
 
 			if ( empty( $data['postcode'] ) ) {
-				$errors['postcode'] = __( 'CEP inválido', 'ppp-brasil' );
+				$errors['postcode'] = __( 'CEP inválido', 'paypal-plus-brasil' );
 			}
 
 			// Check email.
 			if ( ! is_email( $data['email'] ) ) {
-				$errors['email'] = __( 'Email inválido', 'ppp-brasil' );
+				$errors['email'] = __( 'Email inválido', 'paypal-plus-brasil' );
 			}
 
 			// Only if require CPF/CNPJ
@@ -1003,22 +994,22 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 				// Check address number (only with CPF/CPNJ)
 				if ( empty( $data['number'] ) ) {
-					$errors['number'] = __( 'Número inválido', 'ppp-brasil' );
+					$errors['number'] = __( 'Número inválido', 'paypal-plus-brasil' );
 				}
 
 				// Check person type.
 				if ( $data['person_type'] !== '1' && $data['person_type'] !== '2' ) {
-					$errors['person_type'] = __( 'Tipo de pessoa inválido', 'ppp-brasil' );
+					$errors['person_type'] = __( 'Tipo de pessoa inválido', 'paypal-plus-brasil' );
 				}
 
 				// Check the CPF
 				if ( $data['person_type'] == '1' && ! $this->is_cpf( $data['cpf'] ) ) {
-					$errors['cpf'] = __( 'CPF inválido', 'ppp-brasil' );
+					$errors['cpf'] = __( 'CPF inválido', 'paypal-plus-brasil' );
 				}
 
 				// Check the CNPJ
 				if ( $data['person_type'] == '2' && ! $this->is_cnpj( $data['cnpj'] ) ) {
-					$errors['cnpj'] = __( 'CNPJ inválido', 'ppp-brasil' );
+					$errors['cnpj'] = __( 'CNPJ inválido', 'paypal-plus-brasil' );
 				}
 
 			}
@@ -1032,7 +1023,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 		public function checkout_scripts() {
 			// Just load this script in checkout and if isn't in order-receive.
 			if ( is_checkout() && ! get_query_var( 'order-received' ) ) {
-				if ( 'yes' === $this->js_debug ) {
+				if ( 'yes' === $this->debug ) {
 					wp_enqueue_script( 'pretty-web-console', plugins_url( 'assets/js/pretty-web-console.lib.js', __DIR__ ), array(), '0.10.1', true );
 				}
 				wp_enqueue_script( 'ppp-script', '//www.paypalobjects.com/webstatic/ppplusdcc/ppplusdcc.min.js', array(), WC_PPP_Brasil::$VERSION, true );
@@ -1045,9 +1036,9 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					'language'          => get_woocommerce_currency() === 'BRL' ? 'pt_BR' : 'en_US',
 					'country'           => $this->get_woocommerce_country(),
 					'messages'          => array(
-						'check_entry' => __( 'Verifique os dados informados e tente novamente', 'ppp-brasil' ),
+						'check_entry' => __( 'Verifique os dados informados e tente novamente', 'paypal-plus-brasil' ),
 					),
-					'debug_mode'        => 'yes' === $this->js_debug,
+					'debug_mode'        => 'yes' === $this->debug,
 				) );
 				wp_enqueue_script( 'wc-ppp-brasil-script', plugins_url( 'assets/js/frontend.js', __DIR__ ), array( 'jquery' ), WC_PPP_Brasil::$VERSION, true );
 				wp_enqueue_style( 'wc-ppp-brasil-style', plugins_url( 'assets/css/frontend.css', __DIR__ ), array(), WC_PPP_Brasil::$VERSION, 'all' );
@@ -1084,7 +1075,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 		public function admin_scripts() {
 			$screen         = get_current_screen();
 			$screen_id      = $screen ? $screen->id : '';
-			$wc_screen_id   = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
+			$wc_screen_id   = sanitize_title( __( 'WooCommerce', 'paypal-plus-brasil' ) );
 			$wc_settings_id = $wc_screen_id . '_page_wc-settings';
 			if ( $wc_settings_id === $screen_id && isset( $_GET['section'] ) && $_GET['section'] === $this->id ) {
 				wp_enqueue_style( 'wc-ppp-brasil-admin-style', plugins_url( 'assets/css/backend.css', __DIR__ ), array(), WC_PPP_Brasil::$VERSION, 'all' );
@@ -1335,7 +1326,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 		 * @return string
 		 */
 		public function get_title() {
-			$title = __( 'Cartão de Crédito', 'ppp-brasil' );
+			$title = get_woocommerce_currency() === "BRL" ? __( 'Cartão de Crédito', 'paypal-plus-brasil' ) : __( 'Credit Card', 'paypal-plus-brasil' );
 			if ( ! empty( $this->title ) ) {
 				$title .= ' ' . $this->title;
 			}
