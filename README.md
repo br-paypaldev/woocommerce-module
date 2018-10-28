@@ -3,11 +3,11 @@
 **Tags:** paypal, paypal plus, woocommerce, woo commerce, checkout transparente, transparente, pagamento, gateway, paypal brasil, ecommerce, e-commerce  
 **Requires at least:** 4.4  
 **Tested up to:** 4.9  
-**Stable tag:** 1.3  
+**Stable tag:** 1.4  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
 **WC requires at least:** 3.0  
-**WC tested up to:** 3.4  
+**WC tested up to:** 3.5  
 
 Adicione facilmente opções de pagamento do PayPal Plus ao seu site do WordPress/WooCommerce.
 
@@ -79,6 +79,8 @@ Caso tenha alguma dúvida ou dificuldade na utilização do plugin acesse a seç
 
 ### 1.3 - 2018/09/25 ###
 
+### 1.4 - 2018/10/28 ###
+
 * Versão inicial do plugin.
 
 ## Upgrade Notice ##
@@ -94,3 +96,8 @@ Caso tenha alguma dúvida ou dificuldade na utilização do plugin acesse a seç
 * Título do gateway baseado na moeda configurada no WooCommerce.
 * Modificado os detalhes do pagamento na página administrativa do pedido.
 * Alterado o plugin locale para paypal-plus-brasil
+
+### 1.4 ###
+
+* Melhoria nos logs para análise de erros.
+* Validação de compatibilidade com WooCommerce 3.5.
