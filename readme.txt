@@ -77,6 +77,8 @@ Caso tenha alguma dúvida ou dificuldade na utilização do plugin acesse a seç
 
 = 1.4 - 2018/10/28 =
 
+= 1.4.1 - 2018/10/29 =
+
 * Versão inicial do plugin.
 
 == Upgrade Notice ==
@@ -97,3 +99,7 @@ Caso tenha alguma dúvida ou dificuldade na utilização do plugin acesse a seç
 
 * Melhoria nos logs para análise de erros.
 * Validação de compatibilidade com WooCommerce 3.5.
+
+= 1.4.1 =
+
+* Melhoria nos logs para análise de erros.
