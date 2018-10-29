@@ -3,7 +3,7 @@ Contributors: apuhlmann
 Tags: paypal, paypal plus, woocommerce, woo commerce, checkout transparente, transparente, pagamento, gateway, paypal brasil, ecommerce, e-commerce
 Requires at least: 4.4
 Tested up to: 4.9
-Stable tag: 1.4
+Stable tag: 1.4.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 WC requires at least: 3.0
@@ -33,7 +33,7 @@ Caso já tenha uma conta Empresa, você pode solicitar utilização do PayPal Pl
 
 = Compatibilidade =
 
-Compatível à partir da versão 3.0.x até a 3.4.x do WooCommerce.
+Compatível à partir da versão 3.0.x até a 3.5.x do WooCommerce.
 
 = Pré-requisitos =
 
@@ -77,6 +77,8 @@ Caso tenha alguma dúvida ou dificuldade na utilização do plugin acesse a seç
 
 = 1.4 - 2018/10/28 =
 
+= 1.4.1 - 2018/10/29 =
+
 * Versão inicial do plugin.
 
 == Upgrade Notice ==
@@ -97,3 +99,7 @@ Caso tenha alguma dúvida ou dificuldade na utilização do plugin acesse a seç
 
 * Melhoria nos logs para análise de erros.
 * Validação de compatibilidade com WooCommerce 3.5.
+
+= 1.4.1 =
+
+* Melhoria nos logs para análise de erros.

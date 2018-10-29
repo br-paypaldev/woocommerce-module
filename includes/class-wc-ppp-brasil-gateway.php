@@ -458,6 +458,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 				// Log anyway
 				$this->log( 'PayPalConnectionException: ' . $this->print_r( $ex->getMessage(), true ) );
+				$this->log( "data: " . $this->print_r( $data, true ) );
 
 				return null;
 			} catch ( Exception $ex ) {
