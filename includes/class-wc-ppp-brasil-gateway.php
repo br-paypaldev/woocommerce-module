@@ -595,7 +595,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			$execution->setPayerId( $payer_id );
 
 			// Log request
-			$this->log( "Execute payment request: " . $this->print_r( $execution->toArray(), true ) );
+			$this->log( "Execute payment request for ID " . $payment->getId() . ": " . $this->print_r( $execution->toArray(), true ) );
 
 			return $payment->execute( $execution, $api_context );
 		}
