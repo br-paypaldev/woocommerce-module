@@ -1256,6 +1256,13 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 		 * @param $log
 		 */
 		private function log( $log ) {
+			static $prefix;
+
+			// If we don't exists any prefix, create new one.
+			if ( ! $prefix ) {
+				$prefix = 'SESSION_' . $this->unique_id() . ' - ';
+			}
+
 			// Check if is in debug mode.
 			if ( 'yes' == $this->debug ) {
 				$this->log->add( $this->id, $log );
