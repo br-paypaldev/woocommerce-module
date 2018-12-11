@@ -7,7 +7,7 @@
  * Author: PayPal
  * Author URI: https://paypal.com.br
  * Requires at least: 4.4
- * Tested up to: 4.9
+ * Tested up to: 5.0
  * Text Domain: paypal-plus-brasil
  * Domain Path: /languages/
  * WC requires at least: 3.0
