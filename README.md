@@ -107,3 +107,9 @@ Caso tenha alguma dúvida ou dificuldade na utilização do plugin acesse a seç
 ### 1.4.1 ###
 
 * Melhoria nos logs para análise de erros.
+
+### 1.4.2 ###
+
+* Melhoria nos logs para análise de erros.
+* Validação de compatibilidade com WordPress 5.
+* Implementação de Digital Goods.
