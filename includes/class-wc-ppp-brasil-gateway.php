@@ -918,8 +918,6 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				        ->setTransactions( array( $transaction ) )
 				        ->setRedirectUrls( $redirect_urls );
 
-				$this->log( 'Sending create payment request: ' . $this->print_r( $payment->toArray(), true ) );
-
 				// Get API Context.
 				$api_context = $this->get_api_context();
 
@@ -930,10 +928,12 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$application_context->setShippingPreference( $only_digital ? 'no_shipping' : 'SET_PROVIDED_ADDRESS' );
 				$payment->setApplicationContext( $application_context );
 
-				// Create the payment.
-				$payment->create( $api_context );
+				$this->log( 'Sending create payment request: ' . $this->print_r( $payment->toArray(), true ) );
 
-				$this->log( 'Payment created: ' . $this->print_r( $payment->toArray(), true ) );
+				// Create the payment.
+				$result = $payment->create( $api_context );
+
+				$this->log( 'Payment created: ' . $this->print_r( $result->toArray(), true ) );
 
 				return $payment;
 			} catch ( \PayPal\Exception\PayPalConnectionException $ex ) { // Catch any PayPal error.
