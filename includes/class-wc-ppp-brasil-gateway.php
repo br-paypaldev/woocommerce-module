@@ -925,7 +925,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$application_context = new \PayPal\Api\ApplicationContext();
 				$application_context->setBrandName( get_bloginfo( 'name' ) );
 				// Set no shipping if is only digital.
-				$application_context->setShippingPreference( $only_digital ? 'no_shipping' : 'SET_PROVIDED_ADDRESS' );
+				$application_context->setShippingPreference( $only_digital ? 'NO_SHIPPING' : 'SET_PROVIDED_ADDRESS' );
 				$payment->setApplicationContext( $application_context );
 
 				$this->log( 'Sending create payment request: ' . $this->print_r( $payment->toArray(), true ) );
