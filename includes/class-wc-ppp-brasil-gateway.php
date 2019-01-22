@@ -583,9 +583,15 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			                    ->setPath( '/transactions/0/description' )
 			                    ->setValue( sprintf( __( 'Pedido #%s realizado na loja %s', 'paypal-plus-brasil' ), $order->get_id(), get_bloginfo( 'name' ) ) );
 
+			// Add the custom.
+			$patchAddCustom = new \PayPal\Api\Patch();
+			$patchAddCustom->setOp( 'add' )
+			               ->setPath( '/transactions/0/custom' )
+			               ->setValue( sprintf( __( 'Pedido #%s realizado na loja %s', 'paypal-plus-brasil' ), $order->get_id(), get_bloginfo( 'name' ) ) );
+
 			// Create patch request.
 			$patchRequest = new \PayPal\Api\PatchRequest();
-			$patchRequest->setPatches( array( $patchAddInvoiceNumber, $patchAddDescription ) );
+			$patchRequest->setPatches( array( $patchAddInvoiceNumber, $patchAddDescription, $patchAddCustom ) );
 
 			// Update with patch
 			$payment->update( $patchRequest, $api_context );
