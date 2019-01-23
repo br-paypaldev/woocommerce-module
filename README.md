@@ -33,7 +33,7 @@ A experiência de um Checkout Transparente processado com a segurança do PayPal
 
 O produto está disponível para contas PayPal cadastradas com CNPJ (Conta Empresa). Caso a sua conta seja de pessoa física, você deve abrir uma conta PayPal de pessoa jurídica por [este link](https://www.paypal.com/bizsignup/).
 
-Caso já tenha uma conta Empresa, você pode solicitar o Checkout Transparente do PayPal [https://www.paypal.com/br/webapps/mpp/paypal-payments-pro/woocomerce#woocommerce](clicando aqui).
+Caso já tenha uma conta Empresa, você pode solicitar o Checkout Transparente do PayPal [clicando aqui](https://www.paypal.com/br/webapps/mpp/paypal-payments-pro/woocomerce#woocommerce).
 
 ### Compatibilidade ###
 
