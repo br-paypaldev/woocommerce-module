@@ -583,9 +583,15 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			                    ->setPath( '/transactions/0/description' )
 			                    ->setValue( sprintf( __( 'Pedido #%s realizado na loja %s', 'paypal-plus-brasil' ), $order->get_id(), get_bloginfo( 'name' ) ) );
 
+			// Add the custom.
+			$patchAddCustom = new \PayPal\Api\Patch();
+			$patchAddCustom->setOp( 'add' )
+			               ->setPath( '/transactions/0/custom' )
+			               ->setValue( sprintf( __( 'Pedido #%s realizado na loja %s', 'paypal-plus-brasil' ), $order->get_id(), get_bloginfo( 'name' ) ) );
+
 			// Create patch request.
 			$patchRequest = new \PayPal\Api\PatchRequest();
-			$patchRequest->setPatches( array( $patchAddInvoiceNumber, $patchAddDescription ) );
+			$patchRequest->setPatches( array( $patchAddInvoiceNumber, $patchAddDescription, $patchAddCustom ) );
 
 			// Update with patch
 			$payment->update( $patchRequest, $api_context );
@@ -595,7 +601,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			$execution->setPayerId( $payer_id );
 
 			// Log request
-			$this->log( "Execute payment request: " . $this->print_r( $execution->toArray(), true ) );
+			$this->log( "Execute payment request for ID " . $payment->getId() . ": " . $this->print_r( $execution->toArray(), true ) );
 
 			return $payment->execute( $execution, $api_context );
 		}
@@ -786,8 +792,9 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$payment_options->setAllowedPaymentMethod( 'IMMEDIATE_PAY' );
 
 				// Add the items.
-				$items      = array();
-				$cart_items = $order ? $order->get_items() : $cart->get_cart();
+				$only_digital = true;
+				$items        = array();
+				$cart_items   = $order ? $order->get_items() : $cart->get_cart();
 				foreach ( $cart_items as $item_data ) {
 					/** @var WC_Product $product */
 					$product       = wc_get_product( $item_data['variation_id'] ? $item_data['variation_id'] : $item_data['product_id'] );
@@ -804,6 +811,11 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					     ->setUrl( $product->get_permalink() );
 
 					$amount_total += $product_price * ( $order ? $item_data['qty'] : $item_data['quantity'] );
+
+					// Check if product is not digital.
+					if ( ! ( $product->is_downloadable() || $product->is_virtual() ) ) {
+						$only_digital = false;
+					}
 				}
 
 				// If order has discount, add this as a item
@@ -854,36 +866,40 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				// Create the address.
 				if ( ! $dummy ) {
 
-					if ( $data['address_2'] ) {
-						if ( $data['number'] ) {
-							$address_line_1 = sprintf( '%s, %s, %s', $data['address'], $data['number'], $data['address_2'] );
+					// Set shipping only when isn't digital
+					if ( ! $only_digital ) {
+
+						if ( $data['address_2'] ) {
+							if ( $data['number'] ) {
+								$address_line_1 = sprintf( '%s, %s, %s', $data['address'], $data['number'], $data['address_2'] );
+							} else {
+								$address_line_1 = sprintf( '%s, %s', $data['address'], $data['address_2'] );
+							}
 						} else {
-							$address_line_1 = sprintf( '%s, %s', $data['address'], $data['address_2'] );
+							if ( $data['number'] ) {
+								$address_line_1 = sprintf( '%s, %s', $data['address'], $data['number'] );
+							} else {
+								$address_line_1 = sprintf( '%s', $data['address'] );
+							}
 						}
-					} else {
-						if ( $data['number'] ) {
-							$address_line_1 = sprintf( '%s, %s', $data['address'], $data['number'] );
-						} else {
-							$address_line_1 = sprintf( '%s', $data['address'] );
+
+						$address_line_2 = $data['neighborhood'];
+
+						$shipping_address = new \PayPal\Api\ShippingAddress();
+						$shipping_address->setRecipientName( $data['first_name'] . ' ' . $data['last_name'] )
+						                 ->setCountryCode( $data['country'] )
+						                 ->setPostalCode( $data['postcode'] )
+						                 ->setLine1( $address_line_1 )
+						                 ->setCity( $data['city'] )
+						                 ->setState( $data['state'] )
+						                 ->setPhone( $data['phone'] );
+
+						if ( $address_line_2 ) {
+							$shipping_address->setLine2( $address_line_2 );
 						}
+
+						$item_list->setShippingAddress( $shipping_address );
 					}
-
-					$address_line_2 = $data['neighborhood'];
-
-					$shipping_address = new \PayPal\Api\ShippingAddress();
-					$shipping_address->setRecipientName( $data['first_name'] . ' ' . $data['last_name'] )
-					                 ->setCountryCode( $data['country'] )
-					                 ->setPostalCode( $data['postcode'] )
-					                 ->setLine1( $address_line_1 )
-					                 ->setCity( $data['city'] )
-					                 ->setState( $data['state'] )
-					                 ->setPhone( $data['phone'] );
-
-					if ( $address_line_2 ) {
-						$shipping_address->setLine2( $address_line_2 );
-					}
-
-					$item_list->setShippingAddress( $shipping_address );
 				}
 
 				// Create the payer.
@@ -908,21 +924,22 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				        ->setTransactions( array( $transaction ) )
 				        ->setRedirectUrls( $redirect_urls );
 
-				$this->log( 'Sending create payment request: ' . $this->print_r( $payment->toArray(), true ) );
-
 				// Get API Context.
 				$api_context = $this->get_api_context();
 
 				// Set the application context
 				$application_context = new \PayPal\Api\ApplicationContext();
 				$application_context->setBrandName( get_bloginfo( 'name' ) );
-				$application_context->setShippingPreference();
+				// Set no shipping if is only digital.
+				$application_context->setShippingPreference( $only_digital ? 'NO_SHIPPING' : 'SET_PROVIDED_ADDRESS' );
 				$payment->setApplicationContext( $application_context );
 
-				// Create the payment.
-				$payment->create( $api_context );
+				$this->log( 'Sending create payment request: ' . $this->print_r( $payment->toArray(), true ) );
 
-				$this->log( 'Payment created: ' . $this->print_r( $payment->toArray(), true ) );
+				// Create the payment.
+				$result = $payment->create( $api_context );
+
+				$this->log( 'Payment created: ' . $this->print_r( $result->toArray(), true ) );
 
 				return $payment;
 			} catch ( \PayPal\Exception\PayPalConnectionException $ex ) { // Catch any PayPal error.
@@ -1245,6 +1262,13 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 		 * @param $log
 		 */
 		private function log( $log ) {
+			static $prefix;
+
+			// If we don't exists any prefix, create new one.
+			if ( ! $prefix ) {
+				$prefix = 'SESSION_' . $this->unique_id() . ' - ';
+			}
+
 			// Check if is in debug mode.
 			if ( 'yes' == $this->debug ) {
 				$this->log->add( $this->id, $log );

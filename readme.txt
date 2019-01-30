@@ -3,7 +3,8 @@ Contributors: apuhlmann
 Tags: paypal, paypal plus, woocommerce, woo commerce, checkout transparente, transparente, pagamento, gateway, paypal brasil, ecommerce, e-commerce
 Requires at least: 4.4
 Tested up to: 4.9
-Stable tag: 1.4.1
+Stable tag: 1.5
+Requires PHP: 5.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 WC requires at least: 3.0
@@ -13,23 +14,26 @@ Adicione facilmente opções de pagamento do PayPal Plus ao seu site do WordPres
 
 == Description ==
 
-A experiência de um checkout transparente processado com a segurança do PayPal. O usuário efetua o pagamento diretamente em seu site, sem a necessidade de criar uma conta, utilizando apenas o cartão de crédito. Vantagens:
+A experiência de um Checkout Transparente processado com a segurança do PayPal. Seu cliente efetua o pagamento diretamente no seu site, sem redirecionamento e sem a necessidade de abertura de uma conta PayPal, utilizando os dados cartão de crédito, que podem ser salvos para agilizar o pagamento em futuras compras.
 
-* Parcelamento em até 12x
-* Bandeiras aceitas: MasterCard, Visa, American Express, Hypercard, Hyper e Elo
-* Processado com a segurança PayPal
-* Salvar até 03 cartões para compras futuras
-* Maior conversão
+= Conheça mais vantagens do PayPal =
 
-É recomendado que o PayPal Plus seja utilizado juntamente com o Express Checkout, oferecendo assim uma experiência de checkout completa com solução transparente e de carteira.
+* **Segurança:** nível máximo de certificação de segurança PCI Compliance e criptografia em todas as transações.
+* **Programa de Proteção ao Vendedor¹:** protege suas vendas em casos de “chargebacks”, reclamações ou cancelamentos solicitados pelo comprador.
+* **Facilidade no recebimento das vendas:** parcele suas vendas em até 12 vezes e receba em 24 horas², sem tarifa incremental de antecipação.
+* **Atendimento especializado:** atendimento comercial e técnico para tirar suas dúvidas e te ajudar com integrações. Seu cliente também conta com um atendimento bilíngue 24x7.
+* **Venda para novos clientes no exterior:** receba pagamentos de compradores de mais de 200 mercados³ diferentes e para 250 milhões de compradores ao redor do mundo.
+* **Soluções responsivas:** seu cliente compra pelo celular com melhor experiência e estabilidade no mobile.
+
+¹ Sujeito ao cumprimento dos requisitos do Programa de Proteção ao Vendedor e Comprador.
+² Pagamentos recebidos na conta do PayPal e sujeitos a análise de risco e crédito pelo PayPal.
+³ Este módulo só permite recebimento nas moedas Real Brasileiro (BRL) e Dólar Americano (USD).
 
 = Para quem o produto está disponível =
 
 O produto está disponível para contas PayPal cadastradas com CNPJ (Conta Empresa). Caso a sua conta seja de pessoa física, você deve abrir uma conta PayPal de pessoa jurídica por [este link](https://www.paypal.com/bizsignup/).
 
-Caso já tenha uma conta Empresa, você pode solicitar utilização do PayPal Plus pelo email: [comercial@paypal.com](mailto:comercial@paypal.com).
-
-*O PayPal Plus só irá funcionar caso tenha sido aprovado pelo PayPal.
+Caso já tenha uma conta Empresa, você pode solicitar o Checkout Transparente do PayPal [clicando aqui](https://www.paypal.com/br/webapps/mpp/paypal-payments-pro/woocomerce#woocommerce).
 
 = Compatibilidade =
 
@@ -37,19 +41,14 @@ Compatível à partir da versão 3.0.x até a 3.5.x do WooCommerce.
 
 = Pré-requisitos =
 
-Por padrão o WooCommerce não pede no cadastro do cliente as informações de CPF/CNPJ. Estas informações são importantes para o PayPal oferecer uma análise de risco eficiente, portanto este campo é obrigatório para utilizar este plugin. 
-Você pode adicionar esta funcionalidade ao seu WooCommerce via plugin, por exemplo: [WooCommerce Extra Checkout Fields for Brazil](http://wordpress.org/plugins/woocommerce-extra-checkout-fields-for-brazil/).
+Por padrão o WooCommerce não pede no cadastro do cliente as informações de CPF/CNPJ. Estas informações são importantes para o PayPal oferecer uma análise de risco eficiente, portanto este campo é obrigatório para utilizar este plugin.
+Você deve adicionar esta funcionalidade ao seu WooCommerce via plugin, por exemplo: [WooCommerce Extra Checkout Fields for Brazil](http://wordpress.org/plugins/woocommerce-extra-checkout-fields-for-brazil/).
 
 = Instalação =
 
-Basta instalar o plugin e acessar a tela de configuração, nela irá pedir as credenciais de API, no caso o Client ID e o Secret ID. Para obtê-los siga este passo-a-passo:
+O PayPal disponibiliza um tutorial completo com o passo a passo de integração do Chekout Transparente utilizando o WooCommerce para facilitar a integração do meio de pagamento no seu site.
 
-1. Efetuar o login com sua conta PayPal em https://developer.paypal.com e clicar na parte superior "Dashboard";
-1. Clique em "My Apps & Credentials";
-2. Abaixo de "Rest API apps" clique "Create App";
-3. Em seguida, insira o termo “ppplus” no campo "App Name" e clique em "Create App".
-4. No canto superior direito da tela, clique em "Live";
-5. Você deve copiar o código que aparecer em "Client ID" e em "Secret" e colar estes códigos nesta página de configuração. Para ver o "Secret" será necessário clicar em "Show".
+Clique no [link](https://www.paypal.com/br/webapps/mpp/paypal-payments-pro/woocomerce) e siga as instruções.
 
 = Dúvidas/Suporte =
 
@@ -63,6 +62,11 @@ Caso tenha alguma dúvida ou dificuldade na utilização do plugin acesse a seç
 * Ative o plugin.
 
 == Frequently Asked Questions ==
+
+= Instalação do plugin: =
+
+* Envie os arquivos do plugin para a pasta "wp-content/plugins", ou instale usando o instalador de plugins do WordPress.
+* Ative o plugin.
 
 == Screenshots ==
 
@@ -102,4 +106,9 @@ Caso tenha alguma dúvida ou dificuldade na utilização do plugin acesse a seç
 
 = 1.4.1 =
 
+* Melhoria nos logs para análise de erros.
+
+= 1.5.0
+
+* Adicionado suporte a Digital Goods.
 * Melhoria nos logs para análise de erros.
