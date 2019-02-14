@@ -1,9 +1,9 @@
-=== PayPal Plus Brasil ===
+=== Checkout Transparente do PayPal ===
 Contributors: apuhlmann
 Tags: paypal, paypal plus, woocommerce, woo commerce, checkout transparente, transparente, pagamento, gateway, paypal brasil, ecommerce, e-commerce
 Requires at least: 4.4
 Tested up to: 4.9
-Stable tag: 1.5
+Stable tag: 1.5.1
 Requires PHP: 5.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -112,3 +112,7 @@ Caso tenha alguma dúvida ou dificuldade na utilização do plugin acesse a seç
 
 * Adicionado suporte a Digital Goods.
 * Melhoria nos logs para análise de erros.
+
+= 1.5.1 =
+
+* Atualizado título do plugin.
