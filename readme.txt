@@ -83,7 +83,7 @@ Caso tenha alguma dúvida ou dificuldade na utilização do plugin acesse a seç
 
 = 1.4.1 - 2018/10/29 =
 
-* Versão inicial do plugin.
+= 1.6.0 - 2019/03/11 =
 
 == Upgrade Notice ==
 
@@ -119,4 +119,4 @@ Caso tenha alguma dúvida ou dificuldade na utilização do plugin acesse a seç
 
 = 1.6.0 =
 
-* Implementado novo SDK.
+* Removido o PayPal PHP SDK e adicionado funções nativas do WordPress.
