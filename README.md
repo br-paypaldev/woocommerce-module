@@ -3,7 +3,7 @@
 **Tags:** paypal, paypal plus, woocommerce, woo commerce, checkout transparente, transparente, pagamento, gateway, paypal brasil, ecommerce, e-commerce  
 **Requires at least:** 4.4  
 **Tested up to:** 4.9  
-**Stable tag:** 1.5  
+**Stable tag:** 1.6
 **Requires PHP:** 5.6  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  

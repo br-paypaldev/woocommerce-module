@@ -19,6 +19,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 	 * @property string wrong_credentials
 	 * @property string form_height
 	 * @property string invoice_id_prefix
+	 * @property WC_PPP_Brasil_API api
 	 */
 	class WC_PPP_Brasil_Gateway extends WC_Payment_Gateway {
 
@@ -47,6 +48,9 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			$this->wrong_credentials = $this->get_option( 'wrong_credentials' );
 			$this->form_height       = $this->get_option( 'form_height' );
 			$this->invoice_id_prefix = $this->get_option( 'invoice_id_prefix', '' );
+
+			// Start API.
+			$this->api = new WC_PPP_Brasil_API( $this );
 
 			// Active logs.
 			if ( 'yes' == $this->debug ) {
@@ -102,67 +106,107 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			$client_id_key     = $this->get_field_key( 'client_id' );
 			$client_secret_key = $this->get_field_key( 'client_secret' );
 			$mode_key          = $this->get_field_key( 'mode' );
+
 			// Update the client_id and client_secret with the posted data.
 			$this->client_id     = isset( $_POST[ $client_id_key ] ) ? sanitize_text_field( trim( $_POST[ $client_id_key ] ) ) : '';
 			$this->client_secret = isset( $_POST[ $client_secret_key ] ) ? sanitize_text_field( trim( $_POST[ $client_secret_key ] ) ) : '';
 			$this->mode          = isset( $_POST[ $mode_key ] ) ? sanitize_text_field( $_POST[ $mode_key ] ) : '';
-			// Get the API context.
-			$api_context = $this->get_api_context();
+
+			// Validate credentials.
+			$this->validate_credentials();
+
 			// Update things.
-			$this->update_webhooks( $api_context );
+			$this->update_webhooks();
+		}
+
+		/**
+		 * Validate credentials when saving options page.s
+		 */
+		public function validate_credentials() {
+			try {
+				$this->api->get_access_token( true );
+				$this->add_notice( __( 'Suas credenciais estão corretas, um novo token foi gerado.', 'paypal-plus-brasil' ), 'updated' );
+			} catch ( WC_PPP_Brasil_API_Exception $ex ) {
+				$this->log( '[backend] Error generating access token: ' . $this->print_r( $ex->getData(), true ) );
+				// If is invalid credentials
+				if ( $ex->getCode() == 401 ) {
+					$this->wrong_credentials = 'yes';
+					$this->add_notice( __( 'Suas credenciais estão inválidas. Verifique os dados informados e salve as configurações novamente.', 'paypal-plus-brasi' ) );
+				} else {
+					$this->log( 'Houve um erro ao gerar um novo access token. Verifique os logs para mais informações.', 'paypal-plus-brasil' );
+				}
+			}
 		}
 
 		/**
 		 * Update the webhooks.
-		 *
-		 * @param $api_context
 		 */
-		public function update_webhooks( $api_context ) {
+		public function update_webhooks() {
 			// Set by default as not found.
 			$webhook = null;
 			// Check if has client_id and client_secret to connect and get webhooks.
 			$this->log( 'Updating the webhooks' );
+
 			try {
 				$webhook_url = $this->get_webhook_url();
+
 				// Get a list of webhooks
-				$registered_webhooks = \PayPal\Api\Webhook::getAllWithParams( array(), $api_context );
-				$this->log( 'Webhooks list: ' . $this->print_r( $registered_webhooks->toArray(), true ) );
-				/** @var \PayPal\Api\Webhook $registered_webhook */
-				foreach ( $registered_webhooks->getWebhooks() as $registered_webhook ) {
-					if ( $registered_webhook->getUrl() === $webhook_url ) {
-						$this->log( 'Match webhook: ' . $this->print_r( $registered_webhook->toArray(), true ) );
+				$registered_webhooks = $this->api->get_webhooks();
+
+				$this->log( 'Webhooks list: ' . $this->print_r( $registered_webhooks, true ) );
+
+				foreach ( $registered_webhooks['webhooks'] as $registered_webhook ) {
+					if ( $registered_webhook['url'] === $webhook_url ) {
+						$this->log( 'Matched webhook: ' . $this->print_r( $registered_webhook, true ) );
 						$webhook = $registered_webhook;
 						break;
 					}
 				}
+
 				// If no webhook matched, create a new one.
 				if ( ! $webhook ) {
 					$this->log( 'No webhook matched. Creating one.' );
-					$webhook = $this->create_webhook( $api_context );
+
+					$webhook_url = $this->get_webhook_url();
+
+					$events_types = array(
+						'PAYMENT.SALE.COMPLETED',
+						'PAYMENT.SALE.DENIED',
+						'PAYMENT.SALE.PENDING',
+						'PAYMENT.SALE.REFUNDED',
+						'PAYMENT.SALE.REVERSED',
+					);
+
+					// Create webhook.
+					$webhook_result = $this->api->create_webhook( $webhook_url, $events_types );
+
+					// Set the webhook ID
+					$this->log( 'Set webhook ID to: ' . $webhook_result['id'] );
+					$this->webhook_id        = $webhook_result['id'];
+					$this->wrong_credentials = 'no';
+
+					return;
 				}
+
 				// Set the webhook ID
-				$this->log( 'Set webhook ID to: ' . $webhook->getId() );
-				$this->webhook_id        = $webhook->getId();
+				$this->log( 'Set webhook ID to: ' . $webhook['id'] );
+				$this->webhook_id        = $webhook['id'];
 				$this->wrong_credentials = 'no';
-			} catch ( \PayPal\Exception\PayPalConnectionException $ex ) { // If we get here probably was not possible to get the profile ID
+			} catch ( WC_PPP_Brasil_API_Exception $ex ) {
 				$uid_error = $this->unique_id();
 				$this->log( 'Error #' . $uid_error );
 				$this->log( 'Code: ' . $ex->getCode() );
 				$this->log( $ex->getMessage() );
-				$this->log( 'PayPalConnectionException: ' . $this->print_r( json_decode( $ex->getData(), true ), true ) );
-				// If is invalid credentials
-				if ( $ex->getCode() == 401 ) {
-					$this->wrong_credentials = 'yes';
-				}
-			} catch ( Exception $ex ) {
-				$uid_error = $this->unique_id();
-				$this->log( 'Error #' . $uid_error );
-				$this->log( $ex->getMessage() );
-				$this->log( 'PHP Error: ' . $this->print_r( json_decode( $ex->getMessage(), true ), true ) );
+				$this->log( 'WC_PPP_Brasil_API_Exception: ' . $this->print_r( $ex->getData(), true ) );
+
+				$this->add_notice( __( 'Houve um erro ao definir o webhook.', 'paypal-plus-brasil' ) );
 			}
+
 			// If we don't have a webhook, set as empty.ˆ
 			if ( ! $webhook ) {
 				$this->webhook_id = '';
+			} else {
+				$this->add_notice( __( 'O webhook foi definido com sucesso.', 'paypal-plus-brasil' ), 'updated' );
 			}
 		}
 
@@ -188,32 +232,10 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			return $settings;
 		}
 
-		private function create_webhook( $api_context ) {
-			$webhook_url = $this->get_webhook_url();
-
-			$webhook = new \PayPal\Api\Webhook();
-			$webhook->setUrl( $webhook_url );
-
-			$events_types         = array(
-				'PAYMENT.SALE.COMPLETED',
-				'PAYMENT.SALE.DENIED',
-				'PAYMENT.SALE.PENDING',
-				'PAYMENT.SALE.REFUNDED',
-				'PAYMENT.SALE.REVERSED',
-			);
-			$webhook_events_types = array();
-			foreach ( $events_types as $event_type ) {
-				$arg                    = json_encode( array( 'name' => $event_type ) );
-				$webhook_events_types[] = new \PayPal\Api\WebhookEventType( $arg );
-			}
-
-			$webhook->setEventTypes( $webhook_events_types );
-
-			$this->log( 'Request to webhook: ' . $this->print_r( $webhook->toArray(), true ) );
-
-			return $webhook->create( $api_context );
-		}
-
+		/**
+		 * Get the store URL for gateway.
+		 * @return string
+		 */
 		private function get_webhook_url() {
 			$base_url = site_url();
 			if ( $_SERVER['HTTP_HOST'] === 'localhost' ) {
@@ -393,12 +415,10 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 				// execute the order here.
 				$execution = $this->execute_payment( $order, $payment_id, $payer_id );
-				$this->log( 'Execute payment response: ' . $this->print_r( $execution->toArray(), true ) );
-				$transactions      = $execution->getTransactions();
-				$related_resources = $transactions[0]->getRelatedResources();
-				$sale              = $related_resources[0]->getSale();
-				update_post_meta( $order_id, 'wc_ppp_brasil_sale_id', $sale->getId() );
-				update_post_meta( $order_id, 'wc_ppp_brasil_sale', $sale->toArray() );
+				$this->log( 'Execute payment response: ' . $this->print_r( $execution, true ) );
+				$sale = $execution["transactions"][0]["related_resources"][0]["sale"];
+				update_post_meta( $order_id, 'wc_ppp_brasil_sale_id', $sale['id'] );
+				update_post_meta( $order_id, 'wc_ppp_brasil_sale', $sale );
 				$installments = 1;
 				if ( $response_data['result'] && $response_data['result']['term'] && $response_data['result']['term']['term'] && is_numeric( $response_data['result']['term']['term'] ) ) {
 					$installments = $response_data['result']['term']['term'];
@@ -406,7 +426,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				update_post_meta( $order_id, 'wc_ppp_brasil_installments', $installments );
 				update_post_meta( $order_id, 'wc_ppp_brasil_sandbox', $this->mode );
 				$result_success = false;
-				switch ( $sale->getState() ) {
+				switch ( $sale['state'] ) {
 					case 'completed';
 						$order->payment_complete();
 						$result_success = true;
@@ -430,8 +450,8 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 						'redirect' => $this->get_return_url( $order ),
 					);
 				}
-			} catch ( \PayPal\Exception\PayPalConnectionException $ex ) {
-				$data      = json_decode( $ex->getData(), true );
+			} catch ( WC_PPP_Brasil_API_Exception $ex ) {
+				$data      = $ex->getData();
 				$uid_error = $this->unique_id();
 
 				switch ( $data['name'] ) {
@@ -457,15 +477,8 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				}
 
 				// Log anyway
-				$this->log( 'PayPalConnectionException: ' . $this->print_r( $ex->getMessage(), true ) );
-				$this->log( "data: " . $this->print_r( $data, true ) );
-
-				return null;
-			} catch ( Exception $ex ) {
-				$uid_error = $this->unique_id();
-				wc_add_notice( sprintf( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato. Código: %s.', 'paypal-plus-brasil' ), $uid_error ), 'error' );
-				$this->log( 'Error #' . $uid_error );
-				$this->log( 'PHP Error: ' . $this->print_r( $ex->getMessage(), true ) );
+				$this->log( 'WC_PPP_Brasil_API_Exception: ' . $this->print_r( $ex->getMessage(), true ) );
+				$this->log( "Data: " . $this->print_r( $data, true ) );
 
 				return null;
 			}
@@ -492,41 +505,22 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				return new WP_Error( 'error', sprintf( __( 'O reembolso não pode ser menor que %s.', 'paypal-plus-brasil' ), wc_price( 0 ) ) );
 			}
 
-			// Get the API context
-			$api_context = $this->get_api_context();
-
 			// Check if we got the sale ID
 			if ( $sale_id ) {
 				try {
 
-					// Refund amount.
-					$refund_amount = new \PayPal\Api\Amount();
-					$refund_amount->setCurrency( get_woocommerce_currency() )
-					              ->setTotal( $amount );
+					$refund_sale = $this->api->refund_payment( $sale_id, $amount, get_woocommerce_currency() );
 
-					// Refund request.
-					$refund_request = new \PayPal\Api\RefundRequest();
-					$refund_request->setAmount( $refund_amount );
+					$this->log( 'Refund response: ' . $this->print_r( $refund_sale, true ) );
 
-					// Prepare the sale.
-					$sale = new \PayPal\Api\Sale();
-					$sale->setId( $sale_id );
-
-					$this->log( 'Doing refund: ' . $this->print_r( $refund_request->toArray(), true ) );
-
-					// Try to refund.
-					$refund_sale = $sale->refundSale( $refund_request, $api_context );
-
-					$this->log( 'Refund response: ' . $this->print_r( $refund_sale->toArray(), true ) );
-
-					// Check the refuld success.
-					if ( $refund_sale->getState() === 'completed' ) {
+					// Check the result success.
+					if ( $refund_sale['state'] === 'completed' ) {
 						return true;
 					} else {
 						return new WP_Error( 'error', $refund_sale->getReason() );
 					}
 
-				} catch ( \PayPal\Exception\PayPalConnectionException $ex ) { // Catch any PayPal error.
+				} catch ( WC_PPP_Brasil_API_Exception $ex ) { // Catch any PayPal error.
 					$uid_error = $this->unique_id();
 					$data      = json_decode( $ex->getData(), true );
 					$this->log( 'Error #' . $uid_error );
@@ -535,13 +529,6 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					$this->log( 'PayPalConnectionException: ' . $this->print_r( $data, true ) );
 
 					return new WP_Error( 'error', $data['message'] . ' -  Code: #' . $uid_error );
-				} catch ( Exception $ex ) { // Catch any other error.
-					$uid_error = $this->unique_id();
-					$this->log( 'Error #' . $uid_error );
-					$this->log( 'Code: ' . $ex->getCode() );
-					$this->log( $ex->getMessage() );
-
-					return new WP_Error( 'error', $ex->getMessage() . ' -  Code: #' . $uid_error );
 				}
 			} else { // If we don't have the PayPal sale ID.
 				$uid_error = $this->unique_id();
@@ -553,64 +540,43 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 		}
 
-		/** @noinspection PhpDocRedundantThrowsInspection */
-
 		/**
 		 * Execute a payment.
-		 *
-		 * @param $order WC_Order
-		 * @param $payment_id
-		 * @param $payer_id
-		 *
-		 * @throws \PayPal\Exception\PayPalConnectionException
-		 *
-		 * @return \PayPal\Api\Payment
+		 * @throws WC_PPP_Brasil_API_Exception
 		 */
 		public function execute_payment( $order, $payment_id, $payer_id ) {
-			// Get API context.
-			$api_context = $this->get_api_context();
-			$payment     = \PayPal\Api\Payment::get( $payment_id, $api_context );
 
-			// Create invoice number with order ID.
-			$patchAddInvoiceNumber = new \PayPal\Api\Patch();
-			$patchAddInvoiceNumber->setOp( 'add' )
-			                      ->setPath( '/transactions/0/invoice_number' )
-			                      ->setValue( $this->invoice_id_prefix . $order->get_id() );
+			$patch_data = array(
+				array(
+					'op'    => 'add',
+					'path'  => '/transactions/0/invoice_number',
+					'value' => $this->invoice_id_prefix . $order->get_id(),
+				),
+				array(
+					'op'    => 'add',
+					'path'  => '/transactions/0/description',
+					'value' => sprintf( __( 'Pedido #%s realizado na loja %s', 'paypal-plus-brasil' ), $order->get_id(), get_bloginfo( 'name' ) ),
+				),
+				array(
+					'op'    => 'add',
+					'path'  => '/transactions/0/custom',
+					'value' => sprintf( __( 'Pedido #%s realizado na loja %s', 'paypal-plus-brasil' ), $order->get_id(), get_bloginfo( 'name' ) ),
+				),
+			);
 
-			// Add the description with order ID.
-			$patchAddDescription = new \PayPal\Api\Patch();
-			$patchAddDescription->setOp( 'add' )
-			                    ->setPath( '/transactions/0/description' )
-			                    ->setValue( sprintf( __( 'Pedido #%s realizado na loja %s', 'paypal-plus-brasil' ), $order->get_id(), get_bloginfo( 'name' ) ) );
+			$this->log( sprintf( 'Executing patch request for payment id %s: %s', $payment_id, $this->print_r( $patch_data, true ) ) );
+			$this->api->patch_payment( $payment_id, $patch_data );
 
-			// Add the custom.
-			$patchAddCustom = new \PayPal\Api\Patch();
-			$patchAddCustom->setOp( 'add' )
-			               ->setPath( '/transactions/0/custom' )
-			               ->setValue( sprintf( __( 'Pedido #%s realizado na loja %s', 'paypal-plus-brasil' ), $order->get_id(), get_bloginfo( 'name' ) ) );
+			$this->log( sprintf( 'Executing execute request for payment id %s', $payment_id ) );
+			$execution_response = $this->api->execute_payment( $payment_id, $payer_id );
 
-			// Create patch request.
-			$patchRequest = new \PayPal\Api\PatchRequest();
-			$patchRequest->setPatches( array( $patchAddInvoiceNumber, $patchAddDescription, $patchAddCustom ) );
-
-			// Update with patch
-			$payment->update( $patchRequest, $api_context );
-
-			// Payment execute
-			$execution = new \PayPal\Api\PaymentExecution();
-			$execution->setPayerId( $payer_id );
-
-			// Log request
-			$this->log( "Execute payment request for ID " . $payment->getId() . ": " . $this->print_r( $execution->toArray(), true ) );
-
-			return $payment->execute( $execution, $api_context );
+			return $execution_response;
 		}
 
 		/**
 		 * Render the payment fields in checkout.
 		 */
 		public function payment_fields() {
-			include dirname( __FILE__ ) . '/libs/PayPal-PHP-SDK/autoload.php';
 			include dirname( __FILE__ ) . '/views/html-payment-fields.php';
 		}
 
@@ -746,12 +712,12 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			$payment = $this->create_payment( $data, $data['dummy'] );
 
 			// Add session with payment ID to check it later.
-			WC()->session->set( 'wc-ppp-brasil-payment-id', $payment->getId() );
+			WC()->session->set( 'wc-ppp-brasil-payment-id', $payment['id'] );
 
 			// Add the saved remember card, approval link and the payment URL.
 			$data['remembered_cards'] = is_user_logged_in() ? get_user_meta( get_current_user_id(), 'wc_ppp_brasil_remembered_cards', true ) : '';
-			$data['approval_url']     = $payment->getApprovalLink();
-			$data['payment_id']       = $payment->getId();
+			$data['approval_url']     = $payment['links'][1]['href'];
+			$data['payment_id']       = $payment['id'];
 
 			return $data;
 		}
@@ -762,7 +728,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 		 * @param $data
 		 * @param bool $dummy
 		 *
-		 * @return \PayPal\Api\Payment
+		 * @return mixed
 		 * @throws Exception
 		 */
 		public function create_payment( $data, $dummy = false ) {
@@ -776,188 +742,190 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			$cart     = WC()->cart;
 			$this->log( 'Creating payment' );
 			$exception_data = array();
-			try {
 
-				// Store the amount_total, so this will always have the correct total.
-				$amount_total = 0;
+			$payment_data = array(
+				'intent'        => 'sale',
+				'payer'         => array(
+					'payment_method' => 'paypal',
+				),
+				'transactions'  => array(
+					array(
+						'payment_options' => array(
+							'allowed_payment_method' => 'IMMEDIATE_PAY',
+						),
+						'item_list'       => array(
+							'items'            => array(),
+							'shipping_address' => array(
+								'recipient_name' => '',
+								'country_code'   => '',
+								'postal_code'    => '',
+								'line1'          => '',
+								'line2'          => '',
+								'city'           => '',
+								'state'          => '',
+								'phone'          => '',
+							),
+						),
+						'amount'          => array(
+							'currency' => get_woocommerce_currency(),
+						),
+					),
+				),
+				'redirect_urls' => array(
+					'return_url' => home_url(),
+					'cancel_url' => home_url(),
+				),
+			);
 
-				// Create the details.
-				$details      = new  \PayPal\Api\Details();
-				$amount_total += $order ? $order->get_shipping_total() : $cart->shipping_total;
-				$details->setShipping( $order ? $order->get_shipping_total() : $cart->shipping_total )
-				        ->setSubtotal( $order ? $order->get_subtotal() - $order->get_discount_total() : $cart->subtotal - $cart->discount_cart );
+			// Add the items.
+			$items_total  = 0;
+			$only_digital = true;
+			$items        = array();
+			$cart_items   = $order ? $order->get_items() : $cart->get_cart();
+			foreach ( $cart_items as $item_data ) {
+				/** @var WC_Product $product */
+				$product       = wc_get_product( $item_data['variation_id'] ? $item_data['variation_id'] : $item_data['product_id'] );
+				$product_price = $order ? $item_data['line_subtotal'] / $item_data['qty'] : $item_data['line_subtotal'] / $item_data['quantity'];
+				$product_title = isset( $item_data['variation_id'] ) && $item_data['variation_id'] ? $product->get_title() . ' - ' . implode( ', ', $item_data['variation'] ) : $product->get_title();
 
-				// Create payment options.
-				$payment_options = new PayPal\Api\PaymentOptions();
-				$payment_options->setAllowedPaymentMethod( 'IMMEDIATE_PAY' );
+				$items_total += $this->fix_value( ( $order ? $item_data['qty'] : $item_data['quantity'] ) * $product_price );
 
-				// Add the items.
-				$only_digital = true;
-				$items        = array();
-				$cart_items   = $order ? $order->get_items() : $cart->get_cart();
-				foreach ( $cart_items as $item_data ) {
-					/** @var WC_Product $product */
-					$product       = wc_get_product( $item_data['variation_id'] ? $item_data['variation_id'] : $item_data['product_id'] );
-					$item          = new PayPal\Api\Item();
-					$items[]       = $item;
-					$product_price = $order ? $item_data['line_subtotal'] / $item_data['qty'] : $item_data['line_subtotal'] / $item_data['quantity'];
-					$product_price += $order ? $item_data['line_tax'] / $item_data['qty'] : $item_data['line_tax'] / $item_data['quantity'];
-					$product_title = isset( $item_data['variation_id'] ) && $item_data['variation_id'] ? $product->get_title() . ' - ' . implode( ', ', $item_data['variation'] ) : $product->get_title();
-					$item->setName( $product_title )
-					     ->setCurrency( get_woocommerce_currency() )
-					     ->setQuantity( $order ? $item_data['qty'] : $item_data['quantity'] )
-					     ->setPrice( $product_price )
-					     ->setSku( $product->get_sku() ? $product->get_sku() : $product->get_id() )
-					     ->setUrl( $product->get_permalink() );
+				$items[] = array(
+					'name'     => $product_title,
+					'currency' => get_woocommerce_currency(),
+					'quantity' => $order ? $item_data['qty'] : $item_data['quantity'],
+					'price'    => $this->fix_value( $product_price ),
+					'sku'      => $product->get_sku() ? $product->get_sku() : $product->get_id(),
+					'url'      => $product->get_permalink(),
+				);
 
-					$amount_total += $product_price * ( $order ? $item_data['qty'] : $item_data['quantity'] );
-
-					// Check if product is not digital.
-					if ( ! ( $product->is_downloadable() || $product->is_virtual() ) ) {
-						$only_digital = false;
-					}
+				// Check if product is not digital.
+				if ( ! ( $product->is_downloadable() || $product->is_virtual() ) ) {
+					$only_digital = false;
 				}
+			}
 
-				// If order has discount, add this as a item
-				$has_discount = $order ? $order->get_total_discount() : $cart->has_discount();
-				if ( $has_discount ) {
-					$item     = new PayPal\Api\Item();
-					$items[]  = $item;
-					$discount = $order ? $order->get_total_discount() : $cart->discount_cart;
-					$item->setSku( 'discount' )
-					     ->setName( __( 'Desconto', 'paypal-plus-brasil' ) )
-					     ->setQuantity( 1 )
-					     ->setPrice( $discount * - 1 )
-					     ->setCurrency( get_woocommerce_currency() );
+			// Add taxes
+			foreach ( $cart->get_tax_totals() as $tax ) {
+				$items_total += $this->fix_value( $tax->amount );
 
-					$amount_total += $discount * - 1;
-				}
+				$items[] = array(
+					'name'     => $tax->label,
+					'currency' => get_woocommerce_currency(),
+					'quantity' => 1,
+					'sku'      => sanitize_title( $tax->label ),
+					'price'    => $this->fix_value( $tax->amount ),
+				);
+			}
 
-				// If order has fees, add this as a item
-				$fees = $order ? $order->get_fees() : $cart->get_fees();
-				if ( $fees ) {
-					$total_fees = 0;
-					foreach ( $fees as $fee ) {
-						$total_fees += $fee->amount;
-						$item       = new PayPal\Api\Item();
-						$items[]    = $item;
-						$item->setSku( sanitize_title( $fee->name ) )
-						     ->setName( $fee->name )
-						     ->setQuantity( 1 )
-						     ->setPrice( $fee->amount )
-						     ->setCurrency( get_woocommerce_currency() );
-					}
-					if ( $total_fees ) {
-						$details->setSubtotal( (float) $details->getSubtotal() + $total_fees );
-						$amount_total += $total_fees;
-					}
-				}
+			// Add discounts
+			if ( $discount = $this->fix_value( - $cart->get_cart_discount_total() ) ) {
+				$items_total = $this->fix_value( $items_total + $discount );
 
-				// Create the amount.
-				$amount = new \PayPal\Api\Amount();
-				$amount->setCurrency( get_woocommerce_currency() )
-				       ->setTotal( $amount_total )
-				       ->setDetails( $details );
+				$items[] = array(
+					'name'     => __( 'Desconto', 'paypal-plus-brasil' ),
+					'currency' => get_woocommerce_currency(),
+					'quantity' => 1,
+					'sku'      => 'discount',
+					'price'    => $discount,
+				);
+			}
 
-				// Create the item list.
-				$item_list = new \PayPal\Api\ItemList();
-				$item_list->setItems( $items );
+			// Set details
+			$payment_data['transactions'][0]['amount']['details'] = array(
+				'shipping' => $order ? $order->get_shipping_total() : floatval( $cart->shipping_total ),
+				'subtotal' => $order ? $order->get_subtotal() - $order->get_discount_total() : $items_total,
+			);
 
-				// Create the address.
-				if ( ! $dummy ) {
+			// Set total Total
+			$payment_data['transactions'][0]['amount']['total'] = $order ? $order->get_total() : floatval( $cart->total );
 
-					// Set shipping only when isn't digital
-					if ( ! $only_digital ) {
+			// Set the items in payment data.
+			$payment_data['transactions'][0]['item_list']['items'] = $items;
 
-						if ( $data['address_2'] ) {
-							if ( $data['number'] ) {
-								$address_line_1 = sprintf( '%s, %s, %s', $data['address'], $data['number'], $data['address_2'] );
-							} else {
-								$address_line_1 = sprintf( '%s, %s', $data['address'], $data['address_2'] );
-							}
+			// Create the address.
+			if ( ! $dummy ) {
+
+				// Set shipping only when isn't digital
+				if ( ! $only_digital ) {
+
+					if ( $data['address_2'] ) {
+						if ( $data['number'] ) {
+							$address_line_1 = sprintf( '%s, %s, %s', $data['address'], $data['number'], $data['address_2'] );
 						} else {
-							if ( $data['number'] ) {
-								$address_line_1 = sprintf( '%s, %s', $data['address'], $data['number'] );
-							} else {
-								$address_line_1 = sprintf( '%s', $data['address'] );
-							}
+							$address_line_1 = sprintf( '%s, %s', $data['address'], $data['address_2'] );
 						}
-
-						$address_line_2 = $data['neighborhood'];
-
-						$shipping_address = new \PayPal\Api\ShippingAddress();
-						$shipping_address->setRecipientName( $data['first_name'] . ' ' . $data['last_name'] )
-						                 ->setCountryCode( $data['country'] )
-						                 ->setPostalCode( $data['postcode'] )
-						                 ->setLine1( $address_line_1 )
-						                 ->setCity( $data['city'] )
-						                 ->setState( $data['state'] )
-						                 ->setPhone( $data['phone'] );
-
-						if ( $address_line_2 ) {
-							$shipping_address->setLine2( $address_line_2 );
+					} else {
+						if ( $data['number'] ) {
+							$address_line_1 = sprintf( '%s, %s', $data['address'], $data['number'] );
+						} else {
+							$address_line_1 = sprintf( '%s', $data['address'] );
 						}
-
-						$item_list->setShippingAddress( $shipping_address );
 					}
+
+					$address_line_2 = $data['neighborhood'];
+
+					$shipping_address = array(
+						'recipient_name' => $data['first_name'] . ' ' . $data['last_name'],
+						'country_code'   => $data['country'],
+						'postal_code'    => $data['postcode'],
+						'line1'          => $address_line_1,
+						'city'           => $data['city'],
+						'state'          => $data['state'],
+						'phone'          => $data['phone'],
+					);
+
+					if ( $address_line_2 ) {
+						$shipping_address['line2'] = $address_line_2;
+					}
+
+					$payment_data['transactions'][0]['item_list']['shipping_address'] = $shipping_address;
 				}
+			}
 
-				// Create the payer.
-				$payer = new \PayPal\Api\Payer();
-				$payer->setPaymentMethod( 'paypal' );
+			// Set the application context
+			$payment_data['application_context'] = array(
+				'brand_name'          => get_bloginfo( 'name' ),
+				'shipping_preference' => $only_digital ? 'NO_SHIPPING' : 'SET_PROVIDED_ADDRESS',
+			);
 
-				// Create the transaction.
-				$transaction = new \PayPal\Api\Transaction();
-				$transaction->setPaymentOptions( $payment_options )
-				            ->setItemList( $item_list )
-				            ->setAmount( $amount );
+			$this->log( 'Sending create payment request: ' . $this->print_r( $payment_data, true ) );
 
-				// Create thhe redirect urls.
-				$redirect_urls = new \PayPal\Api\RedirectUrls();
-				$redirect_urls->setReturnUrl( home_url() )
-				              ->setCancelUrl( home_url() );
-
+			try {
 				// Create the payment.
-				$payment = new \PayPal\Api\Payment();
-				$payment->setIntent( 'sale' )
-				        ->setPayer( $payer )
-				        ->setTransactions( array( $transaction ) )
-				        ->setRedirectUrls( $redirect_urls );
+				$result = $this->api->create_payment( $payment_data );
 
-				// Get API Context.
-				$api_context = $this->get_api_context();
+				$this->log( 'Payment created: ' . $this->print_r( $result, true ) );
 
-				// Set the application context
-				$application_context = new \PayPal\Api\ApplicationContext();
-				$application_context->setBrandName( get_bloginfo( 'name' ) );
-				// Set no shipping if is only digital.
-				$application_context->setShippingPreference( $only_digital ? 'NO_SHIPPING' : 'SET_PROVIDED_ADDRESS' );
-				$payment->setApplicationContext( $application_context );
-
-				$this->log( 'Sending create payment request: ' . $this->print_r( $payment->toArray(), true ) );
-
-				// Create the payment.
-				$result = $payment->create( $api_context );
-
-				$this->log( 'Payment created: ' . $this->print_r( $result->toArray(), true ) );
-
-				return $payment;
-			} catch ( \PayPal\Exception\PayPalConnectionException $ex ) { // Catch any PayPal error.
+				return $result;
+			} catch ( WC_PPP_Brasil_API_Exception $ex ) { // Catch any PayPal error.
 				$this->log( 'Code: ' . $ex->getCode() );
 				$this->log( $ex->getMessage() );
 				$error_data = json_decode( $ex->getData(), true );
-				$this->log( 'PayPalConnectionException: ' . $this->print_r( $error_data, true ) );
+				$this->log( 'WC_PPP_Brasil_API_Exception: ' . $this->print_r( $error_data, true ) );
 				if ( $error_data['name'] === 'VALIDATION_ERROR' ) {
 					$exception_data = $error_data['details'];
 				}
-			} catch ( Exception $ex ) { // Catch any other error.
-				$this->log( 'PHP Error: ' . $this->print_r( $ex->getMessage(), true ) );
 			}
 
 			$exception       = new Exception( __( 'Ocorreu um erro inesperado, por favor tente novamente. Se o erro persistir entre em contato.', 'paypal-plus-brasil' ) );
 			$exception->data = $exception_data;
 
 			throw $exception;
+		}
+
+		/**
+		 * Fix any value to have always the same digits.
+		 *
+		 * @param $value
+		 * @param int $digits
+		 *
+		 * @return float
+		 */
+		private function fix_value( $value, $digits = 2 ) {
+			$multiplier = 10 ** $digits;
+
+			return round( $value * $multiplier ) / $multiplier;
 		}
 
 		/**
@@ -1104,78 +1072,6 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 		}
 
 		/**
-		 * Get the PayPal API Context.
-		 *
-		 * @return \PayPal\Rest\ApiContext
-		 */
-		public function get_api_context( $client_id = null, $client_secret = null, $mode = null ) {
-			// Autoload the SDK.
-			include_once dirname( __FILE__ ) . '/libs/PayPal-PHP-SDK/autoload.php';
-
-			// Set the instance client_id if not given.
-			if ( $client_id === null ) {
-				$client_id = $this->client_id;
-			}
-
-			// Set the instance client_secret if not given.
-			if ( $client_secret === null ) {
-				$client_secret = $this->client_secret;
-			}
-
-			// Set the instance sandbox if not given.
-			if ( $mode === null ) {
-				$mode = $this->mode;
-			}
-
-			// Create the credentials.
-			$credential         = new \PayPal\Auth\OAuthTokenCredential( $client_id, $client_secret );
-			$api_context        = new \PayPal\Rest\ApiContext( $credential );
-			$api_context_config = array(
-				'mode' => $mode === 'sandbox' ? 'sandbox' : 'live',
-			);
-			$api_context->setConfig( $api_context_config );
-
-			// Add an ID to track this extension.
-			$api_context->addRequestHeader( "PayPal-Partner-Attribution-Id", 'WooCommerceBR_Ecom_PPPlus' );
-
-			return $api_context;
-		}
-
-		public function get_api_context_negative( $client_id = null, $client_secret = null, $mode = null ) {
-			// Autoload the SDK.
-			include_once dirname( __FILE__ ) . '/libs/PayPal-PHP-SDK/autoload.php';
-
-			// Set the instance client_id if not given.
-			if ( $client_id === null ) {
-				$client_id = $this->client_id;
-			}
-
-			// Set the instance client_secret if not given.
-			if ( $client_secret === null ) {
-				$client_secret = $this->client_secret;
-			}
-
-			// Set the instance sandbox if not given.
-			if ( $mode === null ) {
-				$mode = $this->mode;
-			}
-
-			// Create the credentials.
-			$credential         = new \PayPal\Auth\OAuthTokenCredential( $client_id, $client_secret );
-			$api_context        = new \PayPal\Rest\ApiContext( $credential );
-			$api_context_config = array(
-				'mode' => $mode === 'sandbox' ? 'sandbox' : 'live',
-			);
-			$api_context->setConfig( $api_context_config );
-
-			// Add an ID to track this extension.
-			$api_context->addRequestHeader( "PayPal-Partner-Attribution-Id", 'WooCommerceBR_Ecom_PPPlus' );
-			$api_context->addRequestHeader( "PayPal-Mock-Response", '{"mock_application_codes":"INSUFFICIENT_FUNDS"}' );
-
-			return $api_context;
-		}
-
-		/**
 		 * Handle webhooks events.
 		 */
 		public function webhook_handler() {
@@ -1185,40 +1081,39 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			try {
 				$this->log( 'Checking webhook' );
 
-				// Get the data.
-				$headers     = array_change_key_case( getallheaders(), CASE_UPPER );
-				$body        = $this->get_raw_data();
-				$api_context = $this->get_api_context();
-
 				// Instance the handler.
-				$handler = new WC_PPP_Brasil_Webhooks_Handler( $api_context );
+				$handler = new WC_PPP_Brasil_Webhooks_Handler();
+
+				// Get the data.
+				$headers = array_change_key_case( getallheaders(), CASE_UPPER );
+				$body    = $this->get_raw_data();
+
+				$webhook_event = json_decode( $body, true );
 
 				// Prepare the signature verification.
-				$signature_verification = new \PayPal\Api\VerifyWebhookSignature();
-				$signature_verification->setAuthAlgo( $headers['PAYPAL-AUTH-ALGO'] );
-				$signature_verification->setTransmissionId( $headers['PAYPAL-TRANSMISSION-ID'] );
-				$signature_verification->setCertUrl( $headers['PAYPAL-CERT-URL'] );
-				$signature_verification->setWebhookId( $this->webhook_id );
-				$signature_verification->setTransmissionSig( $headers['PAYPAL-TRANSMISSION-SIG'] );
-				$signature_verification->setTransmissionTime( $headers['PAYPAL-TRANSMISSION-TIME'] );
+				$signature_verification = array(
+					'auth_algo'         => $headers['PAYPAL-AUTH-ALGO'],
+					'cert_url'          => $headers['PAYPAL-CERT-URL'],
+					'transmission_id'   => $headers['PAYPAL-TRANSMISSION-ID'],
+					'transmission_sig'  => $headers['PAYPAL-TRANSMISSION-SIG'],
+					'transmission_time' => $headers['PAYPAL-TRANSMISSION-TIME'],
+					'webhook_id'        => $this->webhook_id,
+					'webhook_event'     => $webhook_event,
+				);
 
-				// Create a webhook event from JSON.
-				$webhook_event = new \PayPal\Api\WebhookEvent();
-				$webhook_event->fromJson( $body );
+				$signature_response = $this->api->verify_signature( $signature_verification );
 
-				$signature_verification->setWebhookEvent( $webhook_event );
+				$this->log( 'Signature response: ' . $this->print_r( $signature_response, true ) );
 
-				// Verify the webhook.
-				$output = $signature_verification->post( $api_context );
-
-				// If verification success, handle the event.
-				if ( $output->getVerificationStatus() === 'SUCCESS' ) {
-					$handler->handle( $webhook_event->toArray() );
+				if ( $signature_response['verification_status'] === 'SUCCESS' ) {
+					$this->log( 'Handling event...' );
+					$handler->handle( $webhook_event );
 				}
-			} catch ( \PayPal\Exception\PayPalConnectionException $ex ) { // Catch any PayPal error.
+
+			} catch ( WC_PPP_Brasil_API_Exception $ex ) { // Catch any PayPal error.
 				$this->log( 'Code: ' . $ex->getCode() );
 				$this->log( $ex->getMessage() );
-				$this->log( 'PayPalConnectionException: ' . $this->print_r( json_decode( $ex->getData(), true ), true ) );
+				$this->log( 'WC_PPP_Brasil_API_Exception: ' . $this->print_r( json_decode( $ex->getData(), true ), true ) );
 			} catch ( Exception $ex ) { // Catch any other error.
 				$this->log( 'PHP Error: ' . $this->print_r( $ex->getMessage(), true ) );
 			}
@@ -1368,6 +1263,25 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			} else {
 				return wc_print_r( $expression, $return );
 			}
+		}
+
+		public function add_notice( $text, $type = 'error' ) {
+			$notices   = get_option( 'wc-ppp-brasil-notices', array() );
+			$notices[] = array(
+				'text' => $text,
+				'type' => $type,
+			);
+			update_option( 'wc-ppp-brasil-notices', $notices );
+		}
+
+		public function get_notices( $clear = true ) {
+			$notices = get_option( 'wc-ppp-brasil-notices', array() );
+
+			if ( $clear ) {
+				update_option( 'wc-ppp-brasil-notices', array() );
+			}
+
+			return $notices;
 		}
 
 	}

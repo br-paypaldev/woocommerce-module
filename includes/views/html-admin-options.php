@@ -1,10 +1,4 @@
 <?php /** @var WC_PPP_Brasil_Gateway $this */ ?>
-<?php if ( 'yes' == $this->wrong_credentials ): ?>
-    <div id="message-invalid-credentials" class="error inline">
-        <p><strong>Suas credenciais estão inválidas. Verifique os dados informados e salve as configurações
-                novamente.</strong></p>
-    </div>
-<?php endif; ?>
 <?php if ( pppbr_needs_cpf() && ! class_exists( 'Extra_Checkout_Fields_For_Brazil' ) ): ?>
     <div id="message-wecfb" class="error inline">
         <p>
@@ -19,6 +13,15 @@
         </p>
     </div>
 <?php endif; ?>
+
+<?php if ( $notices = $this->get_notices() ): ?>
+	<?php foreach ( $notices as $notice ): ?>
+        <div class="<?php echo $notice['type']; ?> inline">
+            <p><strong><?php echo $notice['text']; ?></strong></p>
+        </div>
+	<?php endforeach; ?>
+<?php endif; ?>
+
 <img class="ppp-brasil-banner"
      src="<?php echo $this->plugin_url( 'assets/images/banner.png' ); ?>"
      title="PayPal Plus Brasil"
