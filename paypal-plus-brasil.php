@@ -3,15 +3,16 @@
 /**
  * Plugin Name: Checkout Transparente do PayPal
  * Description: Adicione o checkout transparente do PayPal ao seu checkout.
- * Version: 1.5.1
+ * Version: 1.6.0
  * Author: PayPal
  * Author URI: https://paypal.com.br
  * Requires at least: 4.4
- * Tested up to: 5.0
+ * Tested up to: 5.1
  * Text Domain: paypal-plus-brasil
  * Domain Path: /languages/
  * WC requires at least: 3.0
  * WC tested up to: 3.5
+ * Requires PHP: 5.6
  */
 
 // Exit if not in WordPress.
@@ -27,7 +28,7 @@ if ( ! class_exists( 'WC_PPP_Brasil' ) ) {
 	 */
 	class WC_PPP_Brasil {
 
-		public static $VERSION = '1.5.1';
+		public static $VERSION = '1.6.0';
 
 		/**
 		 * Current plugin instance.
@@ -88,6 +89,8 @@ if ( ! class_exists( 'WC_PPP_Brasil' ) ) {
 		public function include_gateway() {
 			// Check if WooCommerce is installed
 			if ( class_exists( 'WC_Payment_Gateway' ) ) {
+				include dirname( __FILE__ ) . '/includes/class-wc-ppp-brasil-api-exception.php';
+				include dirname( __FILE__ ) . '/includes/class-wc-ppp-brasil-api.php';
 				include dirname( __FILE__ ) . '/includes/class-wc-ppp-brasil-gateway.php';
 				include dirname( __FILE__ ) . '/includes/class-wc-ppp-brasil-metabox.php';
 				if ( ! in_array( get_woocommerce_currency(), WC_PPP_Brasil::get_allowed_currencies() ) ) {

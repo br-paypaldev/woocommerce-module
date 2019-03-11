@@ -13,15 +13,10 @@ if ( ! class_exists( 'WC_PPP_Brasil_Webhooks_Handler' ) ) {
 	 */
 	class WC_PPP_Brasil_Webhooks_Handler {
 
-		private $api_context;
-
 		/**
 		 * WC_PPP_Brasil_Webhooks_Handler constructor.
-		 *
-		 * @param $api_context
 		 */
-		public function __construct( $api_context ) {
-			$this->api_context = $api_context;
+		public function __construct() {
 		}
 
 		/**

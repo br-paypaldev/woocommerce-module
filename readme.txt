@@ -3,7 +3,7 @@ Contributors: apuhlmann
 Tags: paypal, paypal plus, woocommerce, woo commerce, checkout transparente, transparente, pagamento, gateway, paypal brasil, ecommerce, e-commerce
 Requires at least: 4.4
 Tested up to: 4.9
-Stable tag: 1.5.1
+Stable tag: 1.6
 Requires PHP: 5.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -83,7 +83,7 @@ Caso tenha alguma dúvida ou dificuldade na utilização do plugin acesse a seç
 
 = 1.4.1 - 2018/10/29 =
 
-* Versão inicial do plugin.
+= 1.6.0 - 2019/03/11 =
 
 == Upgrade Notice ==
 
@@ -108,7 +108,7 @@ Caso tenha alguma dúvida ou dificuldade na utilização do plugin acesse a seç
 
 * Melhoria nos logs para análise de erros.
 
-= 1.5.0
+= 1.5.0 =
 
 * Adicionado suporte a Digital Goods.
 * Melhoria nos logs para análise de erros.
@@ -116,3 +116,7 @@ Caso tenha alguma dúvida ou dificuldade na utilização do plugin acesse a seç
 = 1.5.1 =
 
 * Atualizado título do plugin.
+
+= 1.6.0 =
+
+* Removido o PayPal PHP SDK e adicionado funções nativas do WordPress.
