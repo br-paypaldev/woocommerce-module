@@ -85,6 +85,8 @@ Caso tenha alguma dúvida ou dificuldade na utilização do plugin acesse a seç
 
 = 1.6.0 - 2019/03/11 =
 
+= 1.6.1 - 2019/03/12 =
+
 == Upgrade Notice ==
 
 = 1.0.0 =
@@ -120,3 +122,9 @@ Caso tenha alguma dúvida ou dificuldade na utilização do plugin acesse a seç
 = 1.6.0 =
 
 * Removido o PayPal PHP SDK e adicionado funções nativas do WordPress.
+
+= 1.6.1 =
+
+* Adicionado fees no cálculo total para suportar alguns plugins de descontos.
+* Corrigido erro de PHP que atrapalhava o tratamento de erros.
+* Adicionado versão de suporte para PHP.

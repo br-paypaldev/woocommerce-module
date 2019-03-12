@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Checkout Transparente do PayPal
  * Description: Adicione o checkout transparente do PayPal ao seu checkout.
- * Version: 1.6.0
+ * Version: 1.6.1
  * Author: PayPal
  * Author URI: https://paypal.com.br
  * Requires at least: 4.4
@@ -12,6 +12,7 @@
  * Domain Path: /languages/
  * WC requires at least: 3.0
  * WC tested up to: 3.5
+ * Requires PHP: 5.6
  */
 
 // Exit if not in WordPress.
