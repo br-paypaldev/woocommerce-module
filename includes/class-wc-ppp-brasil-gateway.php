@@ -831,6 +831,21 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				);
 			}
 
+			// Add fees
+			if ( $fees = $cart->get_fees() ) {
+				foreach ( $fees as $fee ) {
+					$items_total = $this->fix_value( $items_total + $fee->total );
+
+					$items[] = array(
+						'name'     => $fee->name,
+						'currency' => get_woocommerce_currency(),
+						'quantity' => 1,
+						'sku'      => $fee->id,
+						'price'    => $this->fix_value( $fee->total ),
+					);
+				}
+			}
+
 			// Set details
 			$payment_data['transactions'][0]['amount']['details'] = array(
 				'shipping' => $order ? $order->get_shipping_total() : floatval( $cart->shipping_total ),
