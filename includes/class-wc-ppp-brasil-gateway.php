@@ -133,7 +133,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					$this->wrong_credentials = 'yes';
 					$this->add_notice( __( 'Suas credenciais estão inválidas. Verifique os dados informados e salve as configurações novamente.', 'paypal-plus-brasi' ) );
 				} else {
-					$this->log( 'Houve um erro ao gerar um novo access token. Verifique os logs para mais informações.', 'paypal-plus-brasil' );
+					$this->log( __( 'Houve um erro ao gerar um novo access token. Verifique os logs para mais informações.', 'paypal-plus-brasil' ) );
 				}
 			}
 		}
@@ -522,7 +522,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 				} catch ( WC_PPP_Brasil_API_Exception $ex ) { // Catch any PayPal error.
 					$uid_error = $this->unique_id();
-					$data      = json_decode( $ex->getData(), true );
+					$data      = $ex->getData();
 					$this->log( 'Error #' . $uid_error );
 					$this->log( 'Code: ' . $ex->getCode() );
 					$this->log( $ex->getMessage() );
@@ -901,7 +901,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			} catch ( WC_PPP_Brasil_API_Exception $ex ) { // Catch any PayPal error.
 				$this->log( 'Code: ' . $ex->getCode() );
 				$this->log( $ex->getMessage() );
-				$error_data = json_decode( $ex->getData(), true );
+				$error_data = $ex->getData();
 				$this->log( 'WC_PPP_Brasil_API_Exception: ' . $this->print_r( $error_data, true ) );
 				if ( $error_data['name'] === 'VALIDATION_ERROR' ) {
 					$exception_data = $error_data['details'];
@@ -1113,7 +1113,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			} catch ( WC_PPP_Brasil_API_Exception $ex ) { // Catch any PayPal error.
 				$this->log( 'Code: ' . $ex->getCode() );
 				$this->log( $ex->getMessage() );
-				$this->log( 'WC_PPP_Brasil_API_Exception: ' . $this->print_r( json_decode( $ex->getData(), true ), true ) );
+				$this->log( 'WC_PPP_Brasil_API_Exception: ' . $this->print_r( $ex->getData(), true ) );
 			} catch ( Exception $ex ) { // Catch any other error.
 				$this->log( 'PHP Error: ' . $this->print_r( $ex->getMessage(), true ) );
 			}
