@@ -793,9 +793,9 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$items[] = array(
 					'name'     => $product_title,
 					'currency' => get_woocommerce_currency(),
-					'quantity' => $order ? $item_data['qty'] : $item_data['quantity'],
+					'quantity' => (string) ( $order ? $item_data['qty'] : $item_data['quantity'] ),
 					'price'    => $this->money_format( $product_price ),
-					'sku'      => $product->get_sku() ? $product->get_sku() : $product->get_id(),
+					'sku'      => (string) ( $product->get_sku() ? $product->get_sku() : $product->get_id() ),
 					'url'      => $product->get_permalink(),
 				);
 
@@ -812,20 +812,20 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$items[] = array(
 					'name'     => $tax->label,
 					'currency' => get_woocommerce_currency(),
-					'quantity' => 1,
+					'quantity' => (string) 1,
 					'sku'      => sanitize_title( $tax->label ),
 					'price'    => $this->money_format( $tax->amount ),
 				);
 			}
 
 			// Add discounts
-			if ( $discount = $this->money_format( - $cart->get_cart_discount_total() ) ) {
+			if ( $discount = - $cart->get_cart_discount_total() ) {
 				$items_total = $this->money_format( $items_total + $discount );
 
 				$items[] = array(
 					'name'     => __( 'Desconto', 'paypal-plus-brasil' ),
 					'currency' => get_woocommerce_currency(),
-					'quantity' => 1,
+					'quantity' => (string) 1,
 					'sku'      => 'discount',
 					'price'    => $this->money_format( $discount ),
 				);
@@ -839,8 +839,8 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 					$items[] = array(
 						'name'     => $fee->name,
 						'currency' => get_woocommerce_currency(),
-						'quantity' => 1,
-						'sku'      => $fee->id,
+						'quantity' => (string) 1,
+						'sku'      => (string) $fee->id,
 						'price'    => $this->money_format( $fee->total ),
 					);
 				}
@@ -853,7 +853,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			);
 
 			// Set total Total
-			$payment_data['transactions'][0]['amount']['total'] = $order ? $order->get_total() : floatval( $cart->total );
+			$payment_data['transactions'][0]['amount']['total'] = $this->money_format( $order ? $order->get_total() : floatval( $cart->total ) );
 
 			// Set the items in payment data.
 			$payment_data['transactions'][0]['item_list']['items'] = $items;
