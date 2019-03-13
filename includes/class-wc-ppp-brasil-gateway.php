@@ -788,13 +788,13 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$product_price = $order ? $item_data['line_subtotal'] / $item_data['qty'] : $item_data['line_subtotal'] / $item_data['quantity'];
 				$product_title = isset( $item_data['variation_id'] ) && $item_data['variation_id'] ? $product->get_title() . ' - ' . implode( ', ', $item_data['variation'] ) : $product->get_title();
 
-				$items_total += $this->fix_value( ( $order ? $item_data['qty'] : $item_data['quantity'] ) * $product_price );
+				$items_total += $this->money_format( ( $order ? $item_data['qty'] : $item_data['quantity'] ) * $product_price );
 
 				$items[] = array(
 					'name'     => $product_title,
 					'currency' => get_woocommerce_currency(),
 					'quantity' => $order ? $item_data['qty'] : $item_data['quantity'],
-					'price'    => $this->fix_value( $product_price ),
+					'price'    => $this->money_format( $product_price ),
 					'sku'      => $product->get_sku() ? $product->get_sku() : $product->get_id(),
 					'url'      => $product->get_permalink(),
 				);
@@ -807,49 +807,49 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 
 			// Add taxes
 			foreach ( $cart->get_tax_totals() as $tax ) {
-				$items_total += $this->fix_value( $tax->amount );
+				$items_total += $this->money_format( $tax->amount );
 
 				$items[] = array(
 					'name'     => $tax->label,
 					'currency' => get_woocommerce_currency(),
 					'quantity' => 1,
 					'sku'      => sanitize_title( $tax->label ),
-					'price'    => $this->fix_value( $tax->amount ),
+					'price'    => $this->money_format( $tax->amount ),
 				);
 			}
 
 			// Add discounts
-			if ( $discount = $this->fix_value( - $cart->get_cart_discount_total() ) ) {
-				$items_total = $this->fix_value( $items_total + $discount );
+			if ( $discount = $this->money_format( - $cart->get_cart_discount_total() ) ) {
+				$items_total = $this->money_format( $items_total + $discount );
 
 				$items[] = array(
 					'name'     => __( 'Desconto', 'paypal-plus-brasil' ),
 					'currency' => get_woocommerce_currency(),
 					'quantity' => 1,
 					'sku'      => 'discount',
-					'price'    => $discount,
+					'price'    => $this->money_format( $discount ),
 				);
 			}
 
 			// Add fees
 			if ( $fees = $cart->get_fees() ) {
 				foreach ( $fees as $fee ) {
-					$items_total = $this->fix_value( $items_total + $fee->total );
+					$items_total = $this->money_format( $items_total + $fee->total );
 
 					$items[] = array(
 						'name'     => $fee->name,
 						'currency' => get_woocommerce_currency(),
 						'quantity' => 1,
 						'sku'      => $fee->id,
-						'price'    => $this->fix_value( $fee->total ),
+						'price'    => $this->money_format( $fee->total ),
 					);
 				}
 			}
 
 			// Set details
 			$payment_data['transactions'][0]['amount']['details'] = array(
-				'shipping' => $order ? $order->get_shipping_total() : floatval( $cart->shipping_total ),
-				'subtotal' => $order ? $order->get_subtotal() - $order->get_discount_total() : $items_total,
+				'shipping' => $this->money_format( $order ? $order->get_shipping_total() : floatval( $cart->shipping_total ) ),
+				'subtotal' => $this->money_format( $order ? $order->get_subtotal() - $order->get_discount_total() : $items_total ),
 			);
 
 			// Set total Total
@@ -927,20 +927,6 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			$exception->data = $exception_data;
 
 			throw $exception;
-		}
-
-		/**
-		 * Fix any value to have always the same digits.
-		 *
-		 * @param $value
-		 * @param int $digits
-		 *
-		 * @return float
-		 */
-		private function fix_value( $value, $digits = 2 ) {
-			$multiplier = 10 ** $digits;
-
-			return round( $value * $multiplier ) / $multiplier;
 		}
 
 		/**

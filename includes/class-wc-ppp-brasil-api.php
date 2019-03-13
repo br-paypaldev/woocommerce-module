@@ -100,7 +100,7 @@ class WC_PPP_Brasil_API {
 		// Get response.
 		$response      = wp_remote_post( $endpoint, array(
 			'headers' => $headers,
-			'body'    => json_encode( $body ),
+			'body'    => json_encode( $body, JSON_UNESCAPED_SLASHES ),
 			'timeout' => $this->timeout,
 		) );
 		$response_body = json_decode( wp_remote_retrieve_body( $response ), true );
@@ -143,7 +143,7 @@ class WC_PPP_Brasil_API {
 		// Get response.
 		$response      = wp_remote_post( $endpoint, array(
 			'headers' => $headers,
-			'body'    => json_encode( $body ),
+			'body'    => json_encode( $body,JSON_UNESCAPED_SLASHES ),
 			'timeout' => 10,
 		) );
 		$response_body = json_decode( wp_remote_retrieve_body( $response ), true );
@@ -182,7 +182,7 @@ class WC_PPP_Brasil_API {
 		$response      = wp_remote_request( $endpoint, array(
 			'method'  => 'PATCH',
 			'headers' => $headers,
-			'body'    => json_encode( $body )
+			'body'    => json_encode( $body,JSON_UNESCAPED_SLASHES )
 		) );
 		$response_body = json_decode( wp_remote_retrieve_body( $response ), true );
 
@@ -236,7 +236,7 @@ class WC_PPP_Brasil_API {
 		// Get response.
 		$response      = wp_remote_post( $endpoint, array(
 			'headers' => $headers,
-			'body'    => json_encode( $body ),
+			'body'    => json_encode( $body,JSON_UNESCAPED_SLASHES ),
 			'timeout' => $this->timeout,
 		) );
 		$response_body = json_decode( wp_remote_retrieve_body( $response ), true );
@@ -327,7 +327,7 @@ class WC_PPP_Brasil_API {
 		// Get response.
 		$response      = wp_remote_post( $endpoint, array(
 			'headers' => $headers,
-			'body'    => json_encode( $body ),
+			'body'    => json_encode( $body,JSON_UNESCAPED_SLASHES ),
 			'timeout' => $this->timeout,
 		) );
 		$response_body = json_decode( wp_remote_retrieve_body( $response ), true );
