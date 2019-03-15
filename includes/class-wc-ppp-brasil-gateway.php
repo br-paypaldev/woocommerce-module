@@ -678,6 +678,8 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			$data    = wp_parse_args( $data, $defaults );
 			$invalid = $this->validate_data( $data );
 
+			$this->log('Captured data: ' . $this->print_r($data, true));
+
 			// if its invalid, return demo data.
 			if ( $invalid ) {
 				$data = array(
