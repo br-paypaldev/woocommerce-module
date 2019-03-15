@@ -639,6 +639,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 				$data['phone']        = $billing_cellphone ? $billing_cellphone : $order->get_billing_phone();
 				$data['email']        = $order->get_billing_email();
 			} else if ( $_POST ) {
+				$this->log( 'Preparing posted data: ' . $this->print_r( $_POST, true ) );
 				$data['postcode']  = isset( $_POST['s_postcode'] ) ? preg_replace( '/[^0-9]/', '', $_POST['s_postcode'] ) : '';
 				$data['address']   = isset( $_POST['s_address'] ) ? sanitize_text_field( $_POST['s_address'] ) : '';
 				$data['address_2'] = isset( $_POST['s_address_2'] ) ? sanitize_text_field( $_POST['s_address_2'] ) : '';
