@@ -758,16 +758,6 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 						),
 						'item_list'       => array(
 							'items'            => array(),
-							'shipping_address' => array(
-								'recipient_name' => '',
-								'country_code'   => '',
-								'postal_code'    => '',
-								'line1'          => '',
-								'line2'          => '',
-								'city'           => '',
-								'state'          => '',
-								'phone'          => '',
-							),
 						),
 						'amount'          => array(
 							'currency' => get_woocommerce_currency(),
