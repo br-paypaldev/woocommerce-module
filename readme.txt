@@ -89,6 +89,8 @@ Caso tenha alguma dúvida ou dificuldade na utilização do plugin acesse a seç
 
 = 1.6.2 - 2019/03/13 =
 
+= 1.6.3 - 2019/03/17 =
+
 == Upgrade Notice ==
 
 = 1.0.0 =
@@ -134,3 +136,7 @@ Caso tenha alguma dúvida ou dificuldade na utilização do plugin acesse a seç
 = 1.6.2 =
 
 * Alterado forma na qual os valores são enviados à API.
+
+= 1.6.3 =
+
+* Corrigido erro com produtos digitais.
