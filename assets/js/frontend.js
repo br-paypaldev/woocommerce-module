@@ -235,6 +235,8 @@ var WC_PPP_Brasil_Checkout = (function () {
             this.log('data', settings);
             // Instance the PPP.
             this.instance = PAYPAL.apps.PPP(settings);
+            // Reset the force submit
+            this.forceSubmit = false;
         }
         else {
             this.$containerDummy.removeClass('hidden');
