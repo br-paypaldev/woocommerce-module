@@ -877,7 +877,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 						'recipient_name' => $data['first_name'] . ' ' . $data['last_name'],
 						'country_code'   => $data['country'],
 						'postal_code'    => $data['postcode'],
-						'line1'          => $address_line_1,
+						'line1'          => mb_substr( $address_line_1, 100 ),
 						'city'           => $data['city'],
 						'state'          => $data['state'],
 						'phone'          => $data['phone'],
