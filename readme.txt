@@ -91,6 +91,8 @@ Caso tenha alguma dúvida ou dificuldade na utilização do plugin acesse a seç
 
 = 1.6.3 - 2019/03/17 =
 
+= 1.6.4 - 2019/03/29 =
+
 == Upgrade Notice ==
 
 = 1.0.0 =
@@ -140,3 +142,7 @@ Caso tenha alguma dúvida ou dificuldade na utilização do plugin acesse a seç
 = 1.6.3 =
 
 * Corrigido erro com produtos digitais.
+
+= 1.6.4 =
+
+* Corrigido problema que causava falha no pagamento sempre que a primeira tentativa desse errado.
