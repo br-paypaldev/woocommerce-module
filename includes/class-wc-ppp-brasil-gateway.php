@@ -678,7 +678,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 			$data    = wp_parse_args( $data, $defaults );
 			$invalid = $this->validate_data( $data );
 
-			$this->log('Captured data: ' . $this->print_r($data, true));
+			$this->log( 'Captured data: ' . $this->print_r( $data, true ) );
 
 			// if its invalid, return demo data.
 			if ( $invalid ) {
@@ -757,7 +757,7 @@ if ( ! class_exists( 'WC_PPP_Brasil_Gateway' ) ) {
 							'allowed_payment_method' => 'IMMEDIATE_PAY',
 						),
 						'item_list'       => array(
-							'items'            => array(),
+							'items' => array(),
 						),
 						'amount'          => array(
 							'currency' => get_woocommerce_currency(),
